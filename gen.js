@@ -301,6 +301,21 @@
     ["He said that he ___ tired.", "was", "is", "be", "were"], ["I wish I ___ a car.", "had", "have", "has", "will have"],
     ["By next year she ___ English for five years.", "will have studied", "studies", "studied", "has studied"], ["___ you like some tea?", "Would", "Will", "Do", "Are"],
     ["We are interested ___ history.", "in", "on", "at", "for"], ["I'm good ___ maths.", "at", "in", "on", "with"], ["She was born ___ 2012.", "in", "on", "at", "by"],
+    ["My birthday is ___ Monday.", "on", "in", "at", "by"], ["We have lunch ___ 1 o'clock.", "at", "in", "on", "for"], ["___ you speak English?", "Can", "Are", "Is", "Has"],
+    ["She ___ TV when I came.", "was watching", "watched", "watches", "is watching"], ["They ___ in Tashkent since 2015.", "have lived", "live", "lived", "are living"],
+    ["How ___ apples are there?", "many", "much", "lot", "any"], ["How ___ water do you drink?", "much", "many", "lot", "few"], ["There isn't ___ milk left.", "any", "some", "many", "a"],
+    ["He is ___ honest man.", "an", "a", "the", "—"], ["This is ___ best day of my life!", "the", "a", "an", "—"], ["You ___ wear a uniform at school. It's a rule.", "must", "can", "may", "would"],
+    ["If I ___ rich, I would travel the world.", "were", "am", "will be", "be"], ["The house ___ built in 1990.", "was", "is", "were", "has"], ["She asked me where I ___.", "lived", "live", "do live", "living"],
+    ["I'm looking forward ___ you.", "to seeing", "to see", "see", "seeing to"], ["He stopped ___ when the teacher came in.", "talking", "to talk", "talk", "talked"],
+    ["Neither Tom ___ Ann came.", "nor", "or", "and", "but"], ["She has been working here ___ five years.", "for", "since", "during", "ago"],
+    ["By the time we arrived, the film ___.", "had started", "started", "has started", "starts"], ["The more you read, the ___ you know.", "more", "most", "much", "many"],
+  ];
+  const GRAM_KIDS = [
+    ["This is ___ apple.", "an", "a", "the", "—"], ["This is ___ cat.", "a", "an", "the", "—"], ["I ___ got a dog.", "have", "has", "am", "is"], ["She ___ got a sister.", "has", "have", "is", "are"],
+    ["Two ___ (кошки)", "cats", "cat", "cates", "catts"], ["Three ___ (ящика)", "boxes", "boxs", "box", "boxies"], ["I can ___.", "swim", "swims", "swimming", "to swim"],
+    ["What colour ___ the sky?", "is", "are", "am", "be"], ["Where ___ you from?", "are", "is", "am", "be"], ["It's ___ the table. (на)", "on", "in", "under", "at"],
+    ["The ball is ___ the box. (в)", "in", "on", "under", "at"], ["___ is your name?", "What", "Who", "Where", "How"], ["___ old are you?", "How", "What", "Who", "Where"],
+    ["Monday, Tuesday, ___", "Wednesday", "Sunday", "Friday", "Thursday"], ["January, February, ___", "March", "May", "April", "June"],
   ];
   const ENG = (grade) => {
     const W = grade <= 4 ? EN1 : grade <= 9 ? EN1.concat(EN2) : EN2.concat(EN3);
@@ -308,10 +323,12 @@
     const opts = (list, i, k) => list.filter((_, j) => j !== i).map((x) => x[k]);
     const wq = (list, dir) => (t) => { const i = t.int(0, list.length - 1), w = list[i], others = opts(list, i, dir ? 1 : 0).sort(() => t.r() - 0.5).slice(0, 3); return dir ? Q(`Как переводится слово «${w[0]}»?`, w[1], others) : Q(`Как по-английски «${w[1]}»?`, w[0], others); };
     const gram = (from, to) => (t) => { const g = t.pick(GRAM_EN.slice(from, to)); return Q(`Выбери правильный вариант: ${g[0]}`, g[1], g.slice(2)); };
-    if (grade <= 4) return [wq(EN1, false), wq(EN1, true), (t) => { const n = t.int(1, 20); return Q(`Как по-английски число ${n}?`, NUM_EN[n], [NUM_EN[(n + 1) % 21] , NUM_EN[Math.max(0, n - 1)] === NUM_EN[n] ? NUM_EN[n + 2] : NUM_EN[Math.max(0, n - 1)], NUM_EN[(n + 10) % 21]]); }, gram(0, 3), gram(3, 5)];
+    const kids = (from, to) => (t) => { const g = t.pick(GRAM_KIDS.slice(from, to)); return Q(`Выбери правильный вариант: ${g[0]}`, g[1], g.slice(2)); };
+    if (grade <= 4) return [wq(EN1, false), wq(EN1, true), (t) => { const n = t.int(1, 20); return Q(`Как по-английски число ${n}?`, NUM_EN[n], [NUM_EN[(n + 1) % 21] , NUM_EN[Math.max(0, n - 1)] === NUM_EN[n] ? NUM_EN[n + 2] : NUM_EN[Math.max(0, n - 1)], NUM_EN[(n + 10) % 21]]); }, kids(0, 8), kids(5, 15)];
     const irr = (k) => (t) => { const i = t.int(0, IRR.length - 1), v = IRR[i]; return Q(`${k === 1 ? "Past Simple" : "Past Participle (V3)"} глагола «${v[0]}» (${v[3]})?`, v[k], [v[0].endsWith("e") ? v[0] + "d" : v[0] + "ed", ...opts(IRR, i, k).sort(() => t.r() - 0.5).slice(0, 2)].filter((x) => x !== v[k]).slice(0, 3).concat(["was"]).slice(0, 3)); };
-    if (grade <= 9) return [wq(words, false), wq(words, true), irr(1), grade >= 7 ? irr(2) : gram(0, 6), grade >= 8 ? gram(6, 14) : gram(3, 11)];
-    return [wq(W, false), wq(words, true), irr(2), gram(8, 17), gram(12, 20)];
+    if (grade <= 6) return [wq(words, false), wq(words, true), irr(1), gram(0, 14), gram(3, 26)];
+    if (grade <= 9) return [wq(words, false), wq(words, true), irr(1), irr(2), gram(6, 38)];
+    return [wq(W, false), wq(words, true), irr(2), gram(12, 32), gram(20, 41)];
   };
 
   /* ================= УЗБЕКСКИЙ (ГОСУДАРСТВЕННЫЙ) 1–11 ================= */
@@ -341,24 +358,57 @@
     math: (g) => MATH[g], alg: (g) => ALG[g], geom: (g) => GEOM[g], phys: (g) => PHYS[g], chem: (g) => CHEM[g], inf: (g) => INF[g],
     eng: ENG, uzb: UZB,
   };
+  /* Each level mixes several question types (the 5 types of a grade go from easier to harder),
+     with review types from the previous grade where there is one:
+     L1 — the two easiest types + all types of the previous grade, L2 — types 1–3 + previous 3–4,
+     L3 — all 5 types, L4 — types 3–5 + previous 4–5, L5 — types 3–5 + the hardest previous type. */
+  const PREV = { alg: { 7: ["math", 6] }, geom: { 7: ["math", 6] } };
+  function pools(subj, grade) {
+    const own = SUBJ[subj](grade);
+    const pv = (PREV[subj] && PREV[subj][grade]) || (SUBJ[subj](grade - 1) ? [subj, grade - 1] : null);
+    const prev = pv ? SUBJ[pv[0]](pv[1]) : null;
+    const tag = (list, key) => list.map((fn, i) => ({ fn, key: key + ":" + i }));
+    const o = tag(own, subj + grade);
+    const p = prev ? tag(prev, pv[0] + pv[1]) : null;
+    const mix = (own, pre) => { const out = []; for (let i = 0; i < Math.max(own.length, pre.length); i++) { if (own[i]) out.push(own[i]); if (pre[i]) out.push(pre[i]); } return out; };
+    const pp = (a, b) => (p ? p.slice(a, b) : []);
+    if (!p) return [o.slice(0, 3), o.slice(0, 4), o.slice(0, 5), o.slice(1, 5), [o[3], o[4], o[2]]];
+    return [
+      mix(o.slice(0, 2), p),
+      mix(o.slice(0, 3), pp(2, 4)),
+      o.slice(0, 5),
+      mix(o.slice(2, 5), pp(3, 5)),
+      mix([o[3], o[4], o[2]], pp(4, 5)),
+    ];
+  }
   /* Returns n questions [q, correct, wrong, wrong, wrong] for subject/grade/level (1–5). */
   function generate(subj, grade, level, n) {
     const fns = SUBJ[subj] && SUBJ[subj](grade);
     if (!fns) return null;
-    /* the level's own generator first; if its pool is small, top up from the nearest levels */
-    const order = [level, level - 1, level + 1, level - 2, level + 2, level - 3, level + 3, level - 4, level + 4].filter((l) => l >= 1 && l <= fns.length);
+    const P = pools(subj, grade);
+    /* the level's own mix first; if those types run out of distinct questions, borrow from neighbouring levels */
+    const order = [level, level - 1, level + 1, level - 2, level + 2].filter((l) => l >= 1 && l <= 5);
     const out = [], seen = new Set();
     for (const lv of order) {
-      const fn = fns[lv - 1];
-      for (let i = 0; out.length < n && i < n * 30; i++) {
-      const t = tools(rng(hash(`${subj}|${grade}|${lv}|${i}`)));
-      let q;
-      try { q = fn(t); } catch (e) { continue; }
-      if (!q || q.length < 5) continue;
-      const opts = q.slice(1, 5).map(String);
-      if (new Set(opts).size < opts.length || seen.has(q[0])) continue;
-      seen.add(q[0]);
-      out.push(q.slice(0, 5).map(String).join("|"));
+      const types = P[lv - 1];
+      const tries = types.map(() => 0);
+      let dead = 0, k = 0;
+      while (out.length < n && dead < types.length) {
+        const ti = k++ % types.length;
+        if (tries[ti] < 0) continue;
+        let got = false;
+        for (let a = 0; a < 40 && !got; a++) {
+          const t = tools(rng(hash(`${subj}|${grade}|${types[ti].key}|${tries[ti]++}`)));
+          let q;
+          try { q = types[ti].fn(t); } catch (e) { continue; }
+          if (!q || q.length < 5) continue;
+          const opts = q.slice(1, 5).map(String);
+          if (new Set(opts).size < opts.length || seen.has(q[0])) continue;
+          seen.add(q[0]);
+          out.push(q.slice(0, 5).map(String).join("|"));
+          got = true;
+        }
+        if (!got) { tries[ti] = -1; dead++; }
       }
       if (out.length >= n) break;
     }
