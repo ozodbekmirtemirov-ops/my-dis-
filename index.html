@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diplomat Класс — вход в игру по коду</title>
+<meta name="description" content="Diplomat International School: введите код игры, который показал учитель, и отвечайте на вопросы с телефона.">
+<meta name="theme-color" content="#1D1E23">
+<meta property="og:title" content="Diplomat Класс — вход в игру по коду">
+<meta property="og:description" content="Введите код игры и отвечайте на вопросы учителя с телефона.">
+<meta property="og:image" content="logo.png">
+<link rel="icon" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Phone-first game controller in the school's look: charcoal, navy, gold. */
+:root{--dark:#1D1E23;--navy:#304381;--gold:#F2B422;--ink:#1D1F23;--muted:rgba(255,255,255,.62);--red:#E21B3C;--blue:#1368CE;--yellow:#D89E00;--green:#26890C;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",Roboto,Arial,sans-serif}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--dark);color:#fff;font:16px/1.4 var(--font);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+button,input{font:inherit}
+#app{min-height:calc(100% - 40px);display:flex;flex-direction:column;padding:max(16px,env(safe-area-inset-top)) 16px max(20px,env(safe-area-inset-bottom))}
+.top{display:flex;align-items:center;gap:10px;min-height:44px}
+.top img{width:36px;height:36px;border-radius:50%}
+.top b{font-size:17px;letter-spacing:.02em}.top .sp{flex:1}
+.pill{background:rgba(255,255,255,.12);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+.pill.gold{background:var(--gold);color:var(--dark)}
+.mid{flex:1;display:flex;flex-direction:column;justify-content:center;gap:18px;width:100%;max-width:460px;margin:0 auto}
+.brand{text-align:center}
+.brand img{width:108px;height:108px;border-radius:50%}
+.brand .t{font-size:34px;font-weight:800;margin-top:12px;letter-spacing:.01em}
+.brand .s{letter-spacing:.24em;font-size:11px;font-weight:600;color:var(--muted);margin-top:4px}
+.card{background:#fff;color:var(--ink);border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:12px}
+.in{width:100%;border:2px solid #E3E4E8;border-radius:14px;padding:14px;font-size:20px;color:var(--ink);background:#fff;text-align:center}
+.in:focus{outline:0;border-color:var(--navy);box-shadow:0 0 0 4px rgba(48,67,129,.15)}
+.in.code{font-size:30px;font-weight:800;letter-spacing:.3em;text-transform:uppercase}
+.btn{border:0;border-radius:14px;padding:16px;font-size:18px;font-weight:800;cursor:pointer;background:var(--dark);color:#fff;transition:transform .1s,opacity .2s}
+.btn:active{transform:scale(.98)}.btn[disabled]{opacity:.5}
+.btn.gold{background:var(--gold);color:var(--dark)}
+.err{color:#D0302E;font-size:15px;text-align:center;font-weight:600}
+.lbl{color:#6E6E73;font-size:14px;font-weight:600;text-align:center}
+.big{font-size:30px;font-weight:800;text-align:center;line-height:1.2;text-wrap:balance}
+.sub{color:var(--muted);text-align:center}
+.nick{display:inline-block;background:var(--gold);color:var(--dark);font-weight:800;border-radius:99px;padding:8px 18px;font-size:20px;align-self:center}
+.dots{display:flex;gap:8px;justify-content:center}.dots i{width:10px;height:10px;border-radius:50%;background:var(--gold);animation:b 1.2s infinite ease-in-out}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,80%,100%{transform:scale(.5);opacity:.4}40%{transform:scale(1);opacity:1}}
+.qbox{background:rgba(255,255,255,.08);border-radius:18px;padding:14px 16px;font-weight:700;font-size:18px;text-align:center}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1;max-height:520px}
+.ans{border:0;border-radius:18px;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px 10px;font-weight:800;font-size:17px;cursor:pointer;min-height:120px;box-shadow:inset 0 -6px 0 rgba(0,0,0,.18);transition:transform .08s}
+.ans:active{transform:scale(.97)}
+.ans span{text-align:center;line-height:1.25;word-break:break-word}
+.res{border-radius:24px;padding:28px 20px;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center}
+.res.ok{background:var(--green)}.res.bad{background:var(--red)}.res.none{background:rgba(255,255,255,.1)}
+.res .h{font-size:30px;font-weight:800}.res .p{font-size:22px;font-weight:800;background:rgba(0,0,0,.18);border-radius:99px;padding:6px 16px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{background:rgba(255,255,255,.08);border-radius:18px;padding:14px;text-align:center}
+.stat small{display:block;color:var(--muted);font-size:13px}.stat b{font-size:28px;font-variant-numeric:tabular-nums}
+.toplist{display:flex;flex-direction:column;gap:8px}
+.trow{display:flex;gap:12px;align-items:center;background:rgba(255,255,255,.08);border-radius:14px;padding:12px 16px;font-weight:700}
+.trow.me{background:var(--gold);color:var(--dark)}.trow .sp{flex:1}
+.link{color:var(--gold);background:none;border:0;font-weight:700;cursor:pointer;padding:10px}
+.timebar{height:8px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}
+.timebar i{display:block;height:100%;background:var(--gold);border-radius:99px;transition:width .25s linear}
+.foot{text-align:center;color:var(--muted);font-size:13px;margin-top:10px}
+.foot a{color:var(--muted)}
+.credit{text-align:center;font-size:11px;letter-spacing:.06em;color:rgba(255,255,255,.42);padding-top:14px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main id="app"><div class="mid"><div class="brand"><img src="logo.png" alt="Эмблема Diplomat International School"><div class="t">DIPLOMAT</div><div class="s">INTERNATIONAL SCHOOL</div></div><p class="sub">Загрузка…</p></div></main>
+<div class="credit">By Mirtemirov Ozodbek</div>
+<noscript><p style="color:#fff;text-align:center">Для игры включите JavaScript в браузере.</p></noscript>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="backend.js"></script>
+<script>
+"use strict";
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const COLORS = ["var(--red)", "var(--blue)", "var(--yellow)", "var(--green)"];
+const SHAPES = ['<path d="M12 3l10 18H2z"/>', '<path d="M12 2l10 10-10 10L2 12z"/>', '<circle cx="12" cy="12" r="10"/>', '<rect x="3" y="3" width="18" height="18" rx="2"/>'];
+const shape = (i, n) => `<svg viewBox="0 0 24 24" width="${n}" height="${n}" fill="#fff" aria-hidden="true">${SHAPES[i % 4]}</svg>`;
+/* Each browser tab remembers its own player, so a reload keeps you in the game. */
+const store = (v) => { try { if (v === undefined) return JSON.parse(sessionStorage.getItem("kl-player")); if (v === null) sessionStorage.removeItem("kl-player"); else sessionStorage.setItem("kl-player", JSON.stringify(v)); } catch (e) { return null; } };
+const newPid = () => "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+
+/* screen: code | nick | play ; P = player {code,pid,nick}; ST = latest game state */
+let screen = "code", P = null, ST = null, off = null, err = "", busy = false;
+let answered = {}, seenQ = -1, qSeenAt = 0, timer = null;
+
+function topbar() {
+  const sc = ST && ST.scores && P ? ST.scores[P.pid] : null;
+  return `<div class="top"><img src="logo.png" alt=""><b>DIPLOMAT</b><span class="sp"></span>${P ? `<span class="pill">${esc(P.nick)}</span>` : ""}${sc ? `<span class="pill gold">${sc[0]}</span>` : ""}</div>`;
+}
+function render() {
+  const app = $("#app");
+  if (screen === "code") {
+    app.innerHTML = `<div class="mid"><div class="brand"><img src="logo.png" alt="Эмблема Diplomat International School"><div class="t">DIPLOMAT</div><div class="s">INTERNATIONAL SCHOOL</div></div>
+      <h1 class="big" style="font-size:24px;margin:0">Вход в игру</h1>
+      <form class="card" id="fCode"><label class="lbl" for="code">Код игры с экрана учителя</label><input class="in code" id="code" maxlength="6" autocomplete="off" autocapitalize="characters" inputmode="text" placeholder="КОД" value="${esc(new URLSearchParams(location.search).get("code") || "")}">
+      <button class="btn gold" ${busy ? "disabled" : ""}>Войти</button>${err ? `<div class="err">${esc(err)}</div>` : ""}</form>
+      <div class="foot">${KL.mode === "local" ? "Режим проверки: работает только в этом браузере.<br>" : ""}<a href="teacher.html">Кабинет учителя</a></div></div>`;
+    const i = $("#code"); if (i && !i.value) i.focus();
+    return;
+  }
+  if (screen === "nick") {
+    app.innerHTML = `<div class="mid">${topbar()}<form class="card" id="fNick"><div class="lbl">Игра ${esc(P.code)}${ST && ST.cls ? " · " + esc(ST.cls) : ""}</div><label class="big" style="font-size:24px" for="nick">Как тебя показать на экране?</label>
+      <input class="in" id="nick" maxlength="20" autocomplete="off" placeholder="Имя или ник">
+      <button class="btn gold" ${busy ? "disabled" : ""}>Готово</button>${err ? `<div class="err">${esc(err)}</div>` : ""}<div class="lbl" style="font-weight:400">Имя видно только во время игры и не сохраняется.</div></form>
+      <button class="link" data-a="back">Другой код</button></div>`;
+    $("#nick").focus();
+    return;
+  }
+  app.innerHTML = topbar() + `<div class="mid">${playView()}</div>`;
+}
+function playView() {
+  const s = ST;
+  if (!s) return `<div class="big">Игра закрыта</div><div class="sub">Учитель завершил игру.</div><button class="btn gold" data-a="back">Ввести другой код</button>`;
+  if ((s.kicked || []).includes(P.pid)) return `<div class="big">Вас убрали из игры</div><div class="sub">Если это ошибка, войдите снова с другим именем.</div><button class="btn gold" data-a="back">Войти снова</button>`;
+  const me = s.scores ? s.scores[P.pid] : null;
+  if (s.phase === "lobby") return `<div class="big">Ты в игре!</div><span class="nick">${esc(P.nick)}</span><div class="sub">Найди своё имя на доске. Игра начнётся, когда учитель нажмёт «Начать».</div><div class="dots"><i></i><i></i><i></i></div>`;
+  if (s.phase === "question") {
+    if (answered[s.qi] !== undefined) return `<div class="big">Ответ принят</div><div class="sub">Ждём остальных…</div><div class="dots"><i></i><i></i><i></i></div>`;
+    const left = Math.max(0, s.secs - (Date.now() - qSeenAt) / 1000);
+    return `<div class="row" style="display:flex;justify-content:space-between;color:var(--muted);font-weight:700"><span>Вопрос ${s.qi + 1} из ${s.n}</span><span id="tl">${Math.ceil(left)} с</span></div>
+      <div class="timebar"><i id="tb" style="width:${(left / s.secs) * 100}%"></i></div>
+      ${s.q ? `<div class="qbox">${esc(s.q.q)}</div>` : ""}
+      <div class="answers">${(s.q ? s.q.o : []).map((o, i) => `<button class="ans" style="background:${COLORS[i % 4]}" data-a="pick" data-i="${i}" ${busy ? "disabled" : ""}>${shape(i, 34)}<span>${esc(o)}</span></button>`).join("")}</div>
+      ${err ? `<div class="err" style="color:#FF9A9A">${esc(err)}</div>` : ""}`;
+  }
+  if (s.phase === "reveal" || s.phase === "board") {
+    const lo = me ? me[3] : -1, lp = me ? me[2] : 0;
+    const cls = lo === 1 ? "ok" : lo === 0 ? "bad" : "none";
+    const h = lo === 1 ? "Верно!" : lo === 0 ? "Неверно" : "Нет ответа";
+    return `<div class="res ${cls}"><div class="h">${h}</div><div class="p">+${lp}</div>${s.q && s.c !== undefined ? `<div style="font-weight:600">Правильный ответ: ${esc(s.q.o[s.c])}</div>` : ""}</div>
+      <div class="stats"><div class="stat"><small>Очки</small><b>${me ? me[0] : 0}</b></div><div class="stat"><small>Место</small><b>${me ? me[1] : "—"}${s.total ? `<small style="display:inline"> из ${s.total}</small>` : ""}</b></div></div>
+      <div class="sub">Смотри на доску</div>`;
+  }
+  if (s.phase === "end") {
+    return `<div class="big">Игра окончена!</div><div class="stats"><div class="stat"><small>Твои очки</small><b>${me ? me[0] : 0}</b></div><div class="stat"><small>Место</small><b>${me ? me[1] : "—"}</b></div></div>
+      <div class="toplist">${(s.top || []).map((t, i) => `<div class="trow${me && me[1] === i + 1 ? " me" : ""}"><span>${i + 1}</span><span>${esc(t[0])}</span><span class="sp"></span><span>${t[1]}</span></div>`).join("")}</div>
+      <button class="link" data-a="back">Выйти</button>`;
+  }
+  return `<div class="dots"><i></i><i></i><i></i></div>`;
+}
+
+function onState(state) {
+  ST = state;
+  if (state && state.phase === "question" && state.qi !== seenQ) { seenQ = state.qi; qSeenAt = Date.now(); err = ""; }
+  if (state && state.phase !== "question") err = "";
+  if (screen === "play") render();
+}
+async function connect() {
+  if (off) off();
+  off = KL.watchGame(P.code, onState);
+  if (!timer) timer = setInterval(() => {
+    if (!ST || ST.phase !== "question" || answered[ST.qi] !== undefined) return;
+    const left = Math.max(0, ST.secs - (Date.now() - qSeenAt) / 1000);
+    const tl = $("#tl"), tb = $("#tb");
+    if (tl) tl.textContent = Math.ceil(left) + " с";
+    if (tb) tb.style.width = (left / ST.secs) * 100 + "%";
+  }, 250);
+}
+
+document.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (busy) return;
+  if (e.target.id === "fCode") {
+    const code = $("#code").value.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (code.length !== 6) { err = "Код состоит из 6 букв и цифр."; return render(); }
+    busy = true; err = ""; render();
+    try {
+      const g = await KL.findGame(code);
+      if (!g) err = "Игра с таким кодом не найдена. Проверь код на доске.";
+      else if (g.state && g.state.phase === "end") err = "Эта игра уже закончилась.";
+      else { P = { code, pid: newPid(), nick: "" }; ST = g.state; screen = "nick"; }
+    } catch (x) { err = "Нет связи. Проверь интернет и попробуй ещё раз."; }
+    busy = false; render();
+  }
+  if (e.target.id === "fNick") {
+    const nick = $("#nick").value.replace(/\s+/g, " ").trim().slice(0, 20);
+    if (!nick) { err = "Напиши имя или ник."; return render(); }
+    busy = true; err = ""; render();
+    try {
+      await KL.joinGame(P.code, P.pid, nick);
+      P.nick = nick; store(P); screen = "play"; answered = {};
+      connect();
+    } catch (x) { err = "Не получилось войти. Возможно, игра уже закончилась."; }
+    busy = false; render();
+  }
+});
+document.addEventListener("click", async (e) => {
+  const el = e.target.closest("[data-a]");
+  if (!el) return;
+  if (el.dataset.a === "back") {
+    if (off) off(); off = null; store(null); P = null; ST = null; err = ""; screen = "code";
+    history.replaceState(null, "", location.pathname); render();
+  }
+  if (el.dataset.a === "pick" && !busy && ST && ST.phase === "question") {
+    const qi = ST.qi, i = +el.dataset.i;
+    busy = true; answered[qi] = i; render();
+    if (navigator.vibrate) try { navigator.vibrate(30); } catch (x) {}
+    try { await KL.answer(P.code, P.pid, qi, i); }
+    catch (x) { delete answered[qi]; err = /time|closed|row-level|violates/i.test(x.message) ? "Время на этот вопрос вышло." : "Ответ не отправился. Нажми ещё раз."; }
+    busy = false; render();
+  }
+});
+
+(async function boot() {
+  if (KL.configError) { $("#app").innerHTML = '<div class="mid"><div class="big">Нет связи</div><div class="sub">Проверь интернет и обнови страницу.</div></div>'; return; }
+  const saved = store();
+  if (saved && saved.code && saved.pid && saved.nick) {
+    try {
+      const g = await KL.findGame(saved.code);
+      if (g && g.state && g.state.phase !== "end" && (await KL.isPlayer(saved.code, saved.pid))) {
+        P = saved; ST = g.state; screen = "play"; seenQ = -1; onState(g.state); connect(); render(); return;
+      }
+    } catch (x) {}
+    store(null);
+  }
+  render();
+})();
+</script>
+</body>
+</html>
