@@ -1,11 +1,8 @@
 /*
   Настройки подключения к базе данных Supabase.
-  Вставьте сюда два значения из Supabase: Project Settings → API.
-  Пока поля пустые, сайт работает в режиме проверки: только в одном браузере на одном компьютере.
 */
 window.KL_CONFIG = {
-  supabaseUrl: "",
-  supabaseKey: "",
-  // Необязательно: адрес страницы для учеников, если она размещена на другом сайте (например, https://diplomat-klass.github.io/)
+  supabaseUrl: "https://qhxiuvmekzqghdizfkna.supabase.co",
+  supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFoeGl1dm1la3pxZ2hkaXpma25hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxOTA5NTEsImV4cCI6MjExMDc2Njk1MX0.AWZpSF1G4qTFpsti0yHMUz8b1ERqE62MDjlihgdOHRE",
   studentUrl: ""
 };
