@@ -327,6 +327,7 @@ b.m1,b.m2,b.m3,.ad-tl b{width:26px;height:26px;border-radius:8px;display:grid;pl
 <div id="app"><div class="center muted">Загрузка платформы…</div></div>
 <div id="modal"></div>
 <div id="toasts"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="bank5.js"></script>
 <script src="bank6.js"></script>
@@ -395,7 +396,7 @@ async function lgSubmit(){const first=$('#lgFirst').value.trim(),last=$('#lgLast
     else{if(!acc){LG.busy=false;LG.err='Такой учитель не найден. Проверьте имя и фамилию или создайте кабинет.';return render()}
       if(await sha(acc.salt+pass)!==acc.hash){LG.busy=false;LG.err='Неверный пароль';return render()}}
     me={tid,first,last,role:(acc&&acc.role)||'teacher'};ls('kl-me',me);LG={mode:'in',err:'',busy:false};if(me.role==='admin'){ready=true;AD.st='idle';toast('Добро пожаловать, '+first+'!');return go('home')}await loadData();
-    if(!S.grades.length)ensureGrades();if(!meta().teacher)setMeta({teacher:first+' '+last});toast('Добро пожаловать, '+first+'!');go('home')}
+    loadCurr();if(!S.grades.length)ensureGrades();if(!meta().teacher)setMeta({teacher:first+' '+last});toast('Добро пожаловать, '+first+'!');go('home')}
   catch(e){LG.busy=false;LG.err='Не удалось связаться с сервером. Повторите попытку.';render()}}
 document.addEventListener('submit',e=>{if(e.target&&e.target.id==='lgForm'){e.preventDefault();
   if(LG.mode==='up'&&$('#lgPass2')&&$('#lgPass2').value!==$('#lgPass').value){LG.err='Пароли не совпадают';LG.first=$('#lgFirst').value;LG.last=$('#lgLast').value;return render()}lgSubmit()}});
@@ -695,7 +696,7 @@ function lvPhone(s){const me2=(s.sc||{})[J.pid]||{s:0,r:'—',c:0},n=s.questions
   else h=`<div class="ph-c"><div class="ph-big">Игра окончена</div><div class="ph-nick">${me2.r} место</div><p>${me2.s} очков · верно ${me2.c} из ${n}</p></div>`;
   return `<div class="ph">${h}</div>`}
 A['lv-ans']=d=>{const s=J&&J.sess;if(!s||s.phase!=='question'||(J.a||{})[s.qi])return;J.a=J.a||{};J.a[s.qi]={c:+d.i,t:Date.now()-(J.lqt||Date.now())};J.rm&&J.rm.presence({a:J.a}).catch(()=>{});try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}render()};
-A['lv-nick']=async()=>{const v=($('#jNick').value||'').trim().slice(0,15);if(!v){J.err='Введи своё имя';return render()}J.nick=v;J.a={};J.st='joined';J.err='';await jConnect();if(J.rm)J.rm.presence({nick:J.nick,a:{}}).catch(()=>{});render()};
+A['lv-nick']=async()=>{const v=($('#jNick').value||'').trim().slice(0,15);if(!v){J.err='Введи своё имя';return render()}J.nick=v;J.a={};J.st='joined';J.err='';J.busy=false;render();await jConnect();if(J.rm)J.rm.presence({nick:J.nick,a:{}}).catch(()=>{});render()};
 
 /* ---------- group mode: teacher ---------- */
 const genCode=()=>{const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let c;do{c=Array.from({length:6},()=>a[Math.floor(Math.random()*a.length)]).join('')}while(S.sessions.some(s=>s.id===c));return c};
@@ -732,7 +733,7 @@ A['g-del']=d=>{const s=S.sessions.find(x=>x.id===d.c),fin=s.status==='finished';
 function joinView(){const wrap=h=>`<div class="center"><div style="width:min(860px,100%);display:flex;flex-direction:column;gap:18px">${h}${isTeacher?`<button class="btn ghost" data-a="leave-join">${ic('back')}Вернуться в режим учителя</button>`:''}</div></div>`;
   if(!db)return wrap(`<div class="card"><h1>Режим ученика</h1><p class="muted">Подключение к групповому тесту работает только в опубликованной версии платформы.</p></div>`);
   if(!J||J.st==='form'){const r=route(),pre=r.startsWith('s-')?r.slice(2).toUpperCase():(J&&J.code)||'';
-    return wrap(`<div class="hero" style="max-width:520px;margin:0 auto;width:100%;flex-direction:column;align-items:stretch;text-align:center"><img src="logo.png" alt="" style="margin:0 auto"><div><div class="sub">DIPLOMAT · INTERNATIONAL SCHOOL</div><h1>Подключение к тесту</h1><div style="color:rgba(255,255,255,.7);margin-top:8px">Введите код, который показал учитель. Имя вводить не нужно.</div></div><form style="display:flex;flex-direction:column;gap:14px"><input class="in" id="jCode" value="${esc(pre)}" maxlength="6" aria-label="Код теста" placeholder="КОД" style="text-transform:uppercase;letter-spacing:.3em;font-size:26px;font-weight:700;text-align:center" autocomplete="off"><button class="btn big" style="background:var(--gold);color:var(--dark)" data-a="j-find" data-submit>Подключиться</button></form>${J&&J.err?`<div style="color:#FF9A9A">${esc(J.err)}</div>`:''}</div>`)}
+    return wrap(`<div class="hero" style="max-width:520px;margin:0 auto;width:100%;flex-direction:column;align-items:stretch;text-align:center"><img src="logo.png" alt="" style="margin:0 auto"><div><div class="sub">DIPLOMAT · INTERNATIONAL SCHOOL</div><h1>Подключение к тесту</h1><div style="color:rgba(255,255,255,.7);margin-top:8px">Введите код, который показал учитель. Имя вводить не нужно.</div></div><form style="display:flex;flex-direction:column;gap:14px"><input class="in" id="jCode" value="${esc(pre)}" maxlength="6" aria-label="Код теста" placeholder="КОД" style="text-transform:uppercase;letter-spacing:.3em;font-size:26px;font-weight:700;text-align:center" autocomplete="off"><button class="btn big" style="background:var(--gold);color:var(--dark)" data-a="j-find" data-submit ${J&&J.busy&&!J.err?'disabled':''}>${J&&J.busy&&!J.err?'Подключаемся…':'Подключиться'}</button></form>${J&&J.err?`<div style="color:#FF9A9A">${esc(J.err)}</div>`:''}</div>`)}
   const s=J.sess;
   if(J.st==='nick')return wrap(`<div class="hero" style="max-width:520px;margin:0 auto;width:100%;flex-direction:column;align-items:stretch;text-align:center"><h1>Как тебя зовут?</h1><form style="display:flex;flex-direction:column;gap:14px"><input class="in" id="jNick" maxlength="15" placeholder="Имя" style="font-size:22px;text-align:center" autofocus>${J.err?`<div style="color:#FF8A8F">${esc(J.err)}</div>`:''}<button class="btn big" data-a="lv-nick" data-submit>Войти в игру</button></form></div>`);
   if(s&&!s.gone&&s.mode==='live')return lvPhone(s);
@@ -745,7 +746,7 @@ A['leave-join']=()=>{jReset();go('home')};
 function jReset(){if(J){J.unsub&&J.unsub();J.rm&&J.rm.leave().catch(()=>{})}J=null;Q=null;try{sessionStorage.removeItem('kl-j')}catch(e){}}
 A['j-reset']=()=>{jReset();render()};
 A['j-find']=async()=>{const code=$('#jCode').value.trim().toUpperCase();if(!/^[A-Z0-9]{6}$/.test(code)){J={st:'form',code,err:'Код состоит из 6 букв и цифр.'};return render()}
-  J={st:'form',code,pid:'p'+uid(),err:''};try{const snap=await db.doc('sessions/'+code).get();if(!snap.exists){J.err='Тест с таким кодом не найден. Проверьте код.';return render()}const d=snap.data();if(d.status==='finished'){J.err='Этот тест уже завершён.';return render()}J.sess=d;J.name=pLabel(J.pid);J.ans=[];if(d.mode==='live'){J.st='nick';return render()}J.st='joined';await jConnect();render()}catch(e){J.st='form';J.err='Не удалось связаться с базой. Попробуйте ещё раз.';render()}};
+  J={st:'form',code,pid:'p'+uid(),err:'',busy:true};render();try{const snap=await db.doc('sessions/'+code).get();if(!snap.exists){J.err='Тест с таким кодом не найден. Проверьте код.';return render()}const d=snap.data();if(d.status==='finished'){J.err='Этот тест уже завершён.';return render()}J.sess=d;J.name=pLabel(J.pid);J.ans=[];if(d.mode==='live'){J.st='nick';return render()}J.st='joined';await jConnect();render()}catch(e){J.st='form';J.err='Не удалось связаться с базой. Попробуйте ещё раз.';render()}};
 async function jConnect(){const code=J.code;J.unsub=db.doc('sessions/'+code).onSnapshot(snap=>{if(!J||J.code!==code)return;J.sess=snap.exists?snap.data():{gone:true};jTick();render()},()=>{});
   if(room){try{J.rm=await room.join('s-'+code.toLowerCase());await J.rm.presence({pid:J.pid,st:J.st,ans:J.ans||[],n:(J.ans||[]).filter(a=>a>=0).length})}catch(e){J.err='Нет связи с учителем. Обновите страницу.'}}jTick()}
 function jTick(){const s=J.sess;if(!s||s.gone)return;if(s.status==='running'&&J.st==='joined'){J.st='started';Q={kind:'group',title:s.title,sub:`${s.sectionName} · ${J.name}`,questions:s.questions,ans:s.questions.map((_,i)=>Number.isInteger((J.ans||[])[i])?J.ans[i]:-1),i:0,endsAt:s.startedAt+s.minutes*6e4};J.rm&&J.rm.presence({st:'started'}).catch(()=>{})}
@@ -944,17 +945,20 @@ function sbAdapter(){const c=SBC,parent=p=>p.split('/').slice(0,-1).join('/'),la
   const docRef=path=>({get:async()=>{const {data,error}=await c.from('kl_docs').select('data').eq('path',path).maybeSingle();if(error)throw error;return{exists:!!data,id:last(path),data:()=>data?data.data:undefined}},
     set:async o=>{const {error}=await c.from('kl_docs').upsert({path,col:parent(path),data:o,updated_at:new Date().toISOString()});if(error)throw error},
     delete:async()=>{const {error}=await c.from('kl_docs').delete().eq('path',path);if(error)throw error},
-    onSnapshot:(cb,err)=>{let alive=true;const pull=()=>docRef(path).get().then(s=>alive&&cb(s)).catch(e=>err&&err(e));pull();
-      const ch=c.channel('d:'+path+':'+uid()).on('postgres_changes',{event:'*',schema:'public',table:'kl_docs',filter:'path=eq.'+path},pull).subscribe();return()=>{alive=false;c.removeChannel(ch)}}});
+    onSnapshot:(cb,err)=>{let alive=true,last='';const pull=()=>docRef(path).get().then(s=>{if(!alive)return;const k=JSON.stringify(s.exists?s.data():null);if(k===last)return;last=k;cb(s)}).catch(e=>err&&err(e));pull();const iv=setInterval(pull,2000);
+      const ch=c.channel('d:'+path+':'+uid()).on('postgres_changes',{event:'*',schema:'public',table:'kl_docs',filter:'path=eq.'+path},pull).subscribe();return()=>{alive=false;clearInterval(iv);c.removeChannel(ch)}}});
   const colRef=(col,flt)=>({doc:id=>docRef(col+'/'+id),where:(f,op,v)=>colRef(col,x=>x&&x[f]===v),
     get:async()=>{const {data,error}=await c.from('kl_docs').select('path,data').eq('col',col);if(error)throw error;const docs=(data||[]).filter(r=>!flt||flt(r.data)).map(r=>({id:last(r.path),exists:true,data:()=>r.data}));return{docs,metadata:{fromCache:false}}},
     onSnapshot:(cb,err)=>{let alive=true,t=null;const pull=()=>colRef(col,flt).get().then(s=>alive&&cb(s)).catch(e=>err&&err(e));pull();
       const ch=c.channel('c:'+col+':'+uid()).on('postgres_changes',{event:'*',schema:'public',table:'kl_docs',filter:'col=eq.'+col},()=>{clearTimeout(t);t=setTimeout(pull,150)}).subscribe();return()=>{alive=false;c.removeChannel(ch)}}});
   return{collection:c2=>colRef(c2),doc:p=>docRef(p)}}
-function sbRoom(){return{join:async name=>{const ch=SBC.channel('room:'+name,{config:{presence:{key:uid(),enabled:true}}});let mine={},peersCb=null,ok=false;
-  const emit=()=>{if(!peersCb)return;const st=ch.presenceState();peersCb({peers:Object.values(st).map(a=>({presence:a[a.length-1]}))})};
-  ch.on('presence',{event:'sync'},emit);await new Promise((res,rej)=>{ch.subscribe(s=>{if(s==='SUBSCRIBED'){ok=true;res()}else if(s==='CHANNEL_ERROR'||s==='TIMED_OUT'){if(!ok)rej(new Error(s))}})});
-  return{presence:async o=>{mine={...mine,...o};await ch.track(mine)},onPeers:(cb,err)=>{peersCb=cb;emit()},leave:async()=>{await ch.untrack();SBC.removeChannel(ch)}}}}}
+function sbRoom(){return{join:async name=>{let mine={},peersCb=null,ch=null,tracked=false;
+  const emit=()=>{if(!peersCb||!ch)return;const st=ch.presenceState();peersCb({peers:Object.values(st).map(a=>({presence:a[a.length-1]}))})};
+  const open=()=>new Promise((res,rej)=>{if(ch)SBC.removeChannel(ch);ch=SBC.channel('room:'+name,{config:{presence:{key:uid(),enabled:true}}});ch.on('presence',{event:'sync'},emit);let done=false;
+    const to=setTimeout(()=>{if(!done){done=true;rej(new Error('timeout'))}},7000);
+    ch.subscribe(st=>{if(st==='SUBSCRIBED'){if(tracked)ch.track(mine).catch(()=>{});if(!done){done=true;clearTimeout(to);res()}}else if((st==='CHANNEL_ERROR'||st==='TIMED_OUT')&&!done){done=true;clearTimeout(to);rej(new Error(st))}})});
+  let err;for(let k=0;k<4;k++){try{await open();err=null;break}catch(e){err=e;await new Promise(r=>setTimeout(r,600))}}if(err)throw err;
+  return{presence:async o=>{mine={...mine,...o};tracked=true;for(let k=0;k<3;k++){try{const r=await ch.track(mine);if(r==='ok')return;}catch(e){}await new Promise(r=>setTimeout(r,500))}},onPeers:(cb,err)=>{peersCb=cb;emit()},leave:async()=>{try{await ch.untrack()}catch(e){}SBC.removeChannel(ch)}}}}}
 async function sbInit(){if(!SB_CFG.url||!SB_CFG.key)return false;try{if(!window.supabase){await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
   SBC=window.supabase.createClient(SB_CFG.url,SB_CFG.key,{auth:{persistSession:false}});db=sbAdapter();room=sbRoom();user=null;sample=null;isTeacher=true;return true}catch(e){return false}}
 
@@ -969,7 +973,7 @@ A['lg-out']=()=>confirmBox('Выйти из кабинета? Ваши данн�
 async function boot(){const SBOK=await sbInit();if(!SBOK){for(let i=0;i<15&&!(window.claude&&window.claude.use);i++)await new Promise(r=>setTimeout(r,100));
   if(window.claude&&window.claude.use){const u=n=>window.claude.use(n).catch(()=>null);[db,user,room,sample]=await Promise.all(['db','user','room','sample'].map(u))}
   if(db&&user){try{isTeacher=!!(await user.canEdit())}catch(e){isTeacher=false}}}
-  loadCurr();
+  if(me)loadCurr();
   if(db&&!isTeacher){ready=true;try{const sv=JSON.parse(sessionStorage.getItem('kl-j'));if(sv&&sv.code){J={st:'joined',...sv};await jConnect()}}catch(e){}}
   else if(me&&me.role==='admin'){ready=true}else if(me)await loadData();else ready=true;
   render()}
