@@ -2,227 +2,888 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Diplomat Класс — вход в игру по коду</title>
-<meta name="description" content="Diplomat International School: введите код игры, который показал учитель, и отвечайте на вопросы с телефона.">
-<meta name="theme-color" content="#1D1E23">
-<meta property="og:title" content="Diplomat Класс — вход в игру по коду">
-<meta property="og:description" content="Введите код игры и отвечайте на вопросы учителя с телефона.">
-<meta property="og:image" content="logo.png">
-<link rel="icon" href="logo.png">
-<link rel="apple-touch-icon" href="logo.png">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diplomat Класс</title>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* Phone-first game controller in the school's look: charcoal, navy, gold. */
-:root{--dark:#1D1E23;--navy:#304381;--gold:#F2B422;--ink:#1D1F23;--muted:rgba(255,255,255,.62);--red:#E21B3C;--blue:#1368CE;--yellow:#D89E00;--green:#26890C;
-  --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",Roboto,Arial,sans-serif}
+/* Layout idea: Diplomat school identity from its video — charcoal sidebar, navy accent, gold pill highlights, dark caption pills — on a calm canvas of white cards. Single theme by choice. */
+:root{
+  color-scheme:light;
+  --bg:#F5F5F7; --card:#FFFFFF; --ink:#1D1D1F; --ink2:#6E6E73; --ink3:#A1A1A6;
+  --line:rgba(0,0,0,.08); --fill:#F0F0F3;
+  --blue:#304381; --blue-soft:#E9EDF8; --gold:#F2B422; --dark:#1D1E23; --navy:#2B3255; --green:#28A951; --green-soft:#E6F6EB;
+  --red:#E5484D; --red-soft:#FDECEC; --orange:#F08C00; --orange-soft:#FFF3E0;
+  --r:18px; --r-s:12px;
+  --shadow:0 1px 2px rgba(0,0,0,.04),0 6px 24px rgba(0,0,0,.05);
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Segoe UI",Roboto,Arial,sans-serif;
+}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-body{background:var(--dark);color:#fff;font:16px/1.4 var(--font);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
-button,input{font:inherit}
-#app{min-height:calc(100% - 40px);display:flex;flex-direction:column;padding:max(16px,env(safe-area-inset-top)) 16px max(20px,env(safe-area-inset-bottom))}
-.top{display:flex;align-items:center;gap:10px;min-height:44px}
-.top img{width:36px;height:36px;border-radius:50%}
-.top b{font-size:17px;letter-spacing:.02em}.top .sp{flex:1}
-.pill{background:rgba(255,255,255,.12);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
-.pill.gold{background:var(--gold);color:var(--dark)}
-.mid{flex:1;display:flex;flex-direction:column;justify-content:center;gap:18px;width:100%;max-width:460px;margin:0 auto}
-.brand{text-align:center}
-.brand img{width:108px;height:108px;border-radius:50%}
-.brand .t{font-size:34px;font-weight:800;margin-top:12px;letter-spacing:.01em}
-.brand .s{letter-spacing:.24em;font-size:11px;font-weight:600;color:var(--muted);margin-top:4px}
-.card{background:#fff;color:var(--ink);border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:12px}
-.in{width:100%;border:2px solid #E3E4E8;border-radius:14px;padding:14px;font-size:20px;color:var(--ink);background:#fff;text-align:center}
-.in:focus{outline:0;border-color:var(--navy);box-shadow:0 0 0 4px rgba(48,67,129,.15)}
-.in.code{font-size:30px;font-weight:800;letter-spacing:.3em;text-transform:uppercase}
-.btn{border:0;border-radius:14px;padding:16px;font-size:18px;font-weight:800;cursor:pointer;background:var(--dark);color:#fff;transition:transform .1s,opacity .2s}
-.btn:active{transform:scale(.98)}.btn[disabled]{opacity:.5}
-.btn.gold{background:var(--gold);color:var(--dark)}
-.err{color:#D0302E;font-size:15px;text-align:center;font-weight:600}
-.lbl{color:#6E6E73;font-size:14px;font-weight:600;text-align:center}
-.big{font-size:30px;font-weight:800;text-align:center;line-height:1.2;text-wrap:balance}
-.sub{color:var(--muted);text-align:center}
-.nick{display:inline-block;background:var(--gold);color:var(--dark);font-weight:800;border-radius:99px;padding:8px 18px;font-size:20px;align-self:center}
-.dots{display:flex;gap:8px;justify-content:center}.dots i{width:10px;height:10px;border-radius:50%;background:var(--gold);animation:b 1.2s infinite ease-in-out}
-.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
-@keyframes b{0%,80%,100%{transform:scale(.5);opacity:.4}40%{transform:scale(1);opacity:1}}
-.qbox{background:rgba(255,255,255,.08);border-radius:18px;padding:14px 16px;font-weight:700;font-size:18px;text-align:center}
-.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1;max-height:520px}
-.ans{border:0;border-radius:18px;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px 10px;font-weight:800;font-size:17px;cursor:pointer;min-height:120px;box-shadow:inset 0 -6px 0 rgba(0,0,0,.18);transition:transform .08s}
-.ans:active{transform:scale(.97)}
-.ans span{text-align:center;line-height:1.25;word-break:break-word}
-.res{border-radius:24px;padding:28px 20px;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center}
-.res.ok{background:var(--green)}.res.bad{background:var(--red)}.res.none{background:rgba(255,255,255,.1)}
-.res .h{font-size:30px;font-weight:800}.res .p{font-size:22px;font-weight:800;background:rgba(0,0,0,.18);border-radius:99px;padding:6px 16px}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.stat{background:rgba(255,255,255,.08);border-radius:18px;padding:14px;text-align:center}
-.stat small{display:block;color:var(--muted);font-size:13px}.stat b{font-size:28px;font-variant-numeric:tabular-nums}
-.toplist{display:flex;flex-direction:column;gap:8px}
-.trow{display:flex;gap:12px;align-items:center;background:rgba(255,255,255,.08);border-radius:14px;padding:12px 16px;font-weight:700}
-.trow.me{background:var(--gold);color:var(--dark)}.trow .sp{flex:1}
-.link{color:var(--gold);background:none;border:0;font-weight:700;cursor:pointer;padding:10px}
-.timebar{height:8px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}
-.timebar i{display:block;height:100%;background:var(--gold);border-radius:99px;transition:width .25s linear}
-.foot{text-align:center;color:var(--muted);font-size:13px;margin-top:10px}
-.foot a{color:var(--muted)}
-.credit{text-align:center;font-size:11px;letter-spacing:.06em;color:rgba(255,255,255,.42);padding-top:14px}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 var(--font);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{margin:0;text-wrap:balance;letter-spacing:-.02em}
+h1{font-size:34px;font-weight:800} h2{font-size:20px;font-weight:600} h3{font-size:16px;font-weight:600}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--ink2)} .small{font-size:13px} .tiny{font-size:12px}
+svg.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:8px}
+
+.shell{display:grid;grid-template-columns:248px 1fr;min-height:100%}
+.side{position:sticky;top:0;height:100vh;padding:22px 14px;display:flex;flex-direction:column;gap:4px;background:var(--dark);color:#fff}
+.brand{display:flex;align-items:center;gap:12px;padding:4px 8px 22px}
+.brand img{width:46px;height:46px;border-radius:50%;flex:none}
+.brand b{display:block;font-size:18px;font-weight:800;letter-spacing:.01em;line-height:1.1}
+.brand small{display:block;font-size:9px;letter-spacing:.2em;color:rgba(255,255,255,.6);margin-top:4px;font-weight:600}
+.nav{display:flex;align-items:center;gap:11px;padding:10px 14px;border-radius:99px;border:0;background:none;text-align:left;cursor:pointer;color:rgba(255,255,255,.78);font-weight:500;width:100%;transition:background .15s,color .15s}
+.nav:hover{background:rgba(255,255,255,.08);color:#fff} .nav.on{background:var(--gold);color:var(--dark);font-weight:700}
+.side .foot{margin-top:auto;display:flex;flex-direction:column;gap:6px;padding:12px 10px 0;border-top:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.55)}
+.side .foot .btn.ghost{color:var(--gold)}
+.login{min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(160deg,#1D1E23,#2B3255)}
+.login .box{width:min(420px,100%);background:#fff;border-radius:24px;padding:32px;box-shadow:0 20px 60px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:14px}
+.login img{width:72px;height:72px;border-radius:50%;margin:0 auto}
+.login h1{font-size:26px;text-align:center}.login label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink2);font-weight:500}
+.login input{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--fill);font-size:16px}
+.login .err{color:var(--red);font-size:13px;min-height:18px}.login .lb{padding:13px;border:0;border-radius:99px;background:var(--blue);color:#fff;font-weight:700;cursor:pointer;font-size:16px}
+.login .lb.sec{background:var(--fill);color:var(--ink)}.me-card{display:flex;align-items:center;gap:10px;color:#fff}.me-card .av{width:34px;height:34px;border-radius:50%;background:var(--gold);color:var(--dark);display:grid;place-items:center;font-weight:800;flex:none}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:6px}
+.dot.off{background:var(--orange)}
+
+.main{min-width:0}
+.top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;padding:14px 36px;background:rgba(245,245,247,.8);backdrop-filter:blur(16px);border-bottom:1px solid transparent}
+.top .title{font-weight:600} .top .sp{flex:1}
+.iconbtn{width:36px;height:36px;border-radius:50%;border:0;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;cursor:pointer;position:relative;transition:transform .15s}
+.iconbtn:hover{transform:scale(1.05)}
+.who{display:flex;align-items:center;gap:9px;padding:5px 14px 5px 5px;border-radius:99px;background:var(--card);box-shadow:var(--shadow);border:0;cursor:pointer;font-weight:500}
+.ava{min-width:28px;padding:0 6px;height:28px;border-radius:50%;background:var(--blue-soft);color:var(--blue);display:grid;place-items:center;font-weight:600;font-size:13px}
+.pop{position:absolute;right:0;top:44px;width:340px;background:var(--card);border-radius:var(--r);box-shadow:0 12px 48px rgba(0,0,0,.16);padding:14px;text-align:left;cursor:default;animation:pop .16s ease}
+.pop li{list-style:none;padding:8px 4px;border-bottom:1px solid var(--line);font-size:13px} .pop li:last-child{border:0} .pop ul{margin:6px 0 0;padding:0}
+
+.page{padding:14px 36px 60px;max-width:1320px;display:flex;flex-direction:column;gap:22px}
+.page.enter{animation:fade .28s ease}
+.page.enter .card{animation:rise .36s ease backwards}
+.page.enter .card:nth-child(2){animation-delay:.04s}.page.enter .card:nth-child(3){animation-delay:.08s}.page.enter .card:nth-child(4){animation-delay:.12s}
+@keyframes fade{from{opacity:.4}to{opacity:1}}
+@keyframes rise{from{opacity:.5;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+@keyframes grow{from{width:0}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.head{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.head .sp{flex:1}
+.crumb{display:inline-flex;align-items:center;gap:4px;color:var(--blue);background:none;border:0;cursor:pointer;padding:0;font-weight:500;margin-bottom:6px}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:22px}
+.card.hover{transition:transform .18s,box-shadow .18s;cursor:pointer}
+.card.hover:hover{transform:translateY(-2px);box-shadow:0 2px 4px rgba(0,0,0,.05),0 14px 36px rgba(0,0,0,.09)}
+.grid{display:grid;gap:18px}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.g21{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+@media (max-width:1180px){.g5{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g21{grid-template-columns:1fr}}
+@media (max-width:860px){.shell{grid-template-columns:1fr}.side{position:static;height:auto;flex-direction:row;flex-wrap:wrap;padding:10px}.side .foot,.brand span{display:none}.side{gap:2px}.brand{padding:4px}.nav{width:auto}.g5,.g3,.g2{grid-template-columns:1fr 1fr}.page,.top{padding-left:16px;padding-right:16px}}
+.kpi .l{color:var(--ink2);font-size:13px;font-weight:500}
+.kpi .v{font-size:34px;font-weight:700;letter-spacing:-.03em;margin-top:6px}
+.kpi .s{font-size:12px;color:var(--ink3);margin-top:2px}
+.row{display:flex;align-items:center;gap:12px}
+.row .sp{flex:1}
+.list>.row{padding:11px 0;border-bottom:1px solid var(--line)} .list>.row:last-child{border:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 16px;border-radius:99px;border:0;background:var(--fill);cursor:pointer;font-weight:500;transition:filter .15s,transform .1s;white-space:nowrap}
+.btn:hover{filter:brightness(.96)} .btn:active{transform:scale(.98)}
+.btn.pri{background:var(--blue);color:#fff} .btn.pri:hover{filter:brightness(1.08)}
+.btn.big{padding:14px 28px;font-size:17px;font-weight:600}
+.btn.ghost{background:none;color:var(--blue);padding:6px 10px}
+.btn.danger{color:var(--red)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.sq{width:34px;height:34px;padding:0;border-radius:50%}
+.btn svg.ic{width:17px;height:17px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;background:var(--fill);color:var(--ink2);white-space:nowrap}
+.chip.blue{background:var(--blue-soft);color:var(--blue)}.chip.green{background:var(--green-soft);color:var(--green)}.chip.red{background:var(--red-soft);color:var(--red)}.chip.orange{background:var(--orange-soft);color:var(--orange)}
+.seg{display:inline-flex;background:rgba(0,0,0,.06);border-radius:11px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;padding:7px 16px;border-radius:9px;cursor:pointer;font-weight:500;transition:background .18s}
+.seg button.on{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.field{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:500;color:var(--ink2)}
+.in{padding:10px 13px;border-radius:var(--r-s);border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:15px;width:100%;transition:border-color .15s,box-shadow .15s}
+.in:focus{outline:0;border-color:var(--blue);box-shadow:0 0 0 3px rgba(48,67,129,.2)}
+textarea.in{resize:vertical;min-height:70px}
+.bar{height:8px;border-radius:99px;background:var(--fill);overflow:hidden;flex:1;min-width:60px}
+.bar i{display:block;height:100%;border-radius:99px;background:var(--blue);animation:grow .7s ease}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:12px;font-weight:600;color:var(--ink3);text-align:left;padding:8px 10px;text-transform:uppercase;letter-spacing:.04em}
+.tbl td{padding:12px 10px;border-top:1px solid var(--line);vertical-align:middle}
+.tbl tr.click{cursor:pointer}.tbl tr.click:hover td{background:#FAFAFC}
+.scroll{overflow-x:auto}
+.place{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;background:var(--fill)}
+.place.p1{background:var(--gold);color:var(--dark)}.place.p2{background:#E3E5EA;color:#545861}.place.p3{background:#F6D9C2;color:#8A4B1D}
+.mark{width:30px;height:30px;border-radius:9px;display:inline-grid;place-items:center;font-weight:700;color:#fff}
+.m5{background:var(--green)}.m4{background:var(--blue)}.m3{background:var(--orange)}.m2,.m1{background:var(--red)}
+.empty{padding:28px 16px;text-align:center;color:var(--ink2);border:1px dashed var(--line);border-radius:var(--r-s)}
+.gradeTile .n{font-size:64px;font-weight:800;letter-spacing:-.05em;line-height:1;color:var(--blue)}
+.lvl .dots{display:flex;gap:4px}.lvl .dots i{width:13px;height:5px;border-radius:9px;background:var(--fill)}.lvl .dots i.on{background:var(--gold)}
+.cap{display:inline-flex;align-items:center;background:var(--dark);color:#fff;border-radius:99px;padding:5px 13px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.cap.gold{background:var(--gold);color:var(--dark)}
+.hero{background:var(--dark);color:#fff;border-radius:24px;padding:34px 38px;display:flex;align-items:center;gap:28px;flex-wrap:wrap;box-shadow:var(--shadow)}
+.hero img{width:104px;height:104px;border-radius:50%;flex:none}
+.hero h1{font-size:38px}
+.hero .sub{letter-spacing:.24em;font-size:12px;font-weight:600;color:rgba(255,255,255,.6);margin-bottom:10px}
+.hero .slogan{display:inline-block;background:var(--gold);color:var(--dark);font-weight:800;border-radius:99px;padding:9px 20px;font-size:16px;margin-top:14px}
+.me td{background:var(--blue-soft)!important}
+
+.quiz{max-width:860px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:18px}
+.opt{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:15px 18px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);cursor:pointer;font-size:16px;transition:border-color .15s,background .15s,transform .1s}
+.opt:hover{border-color:var(--ink3)} .opt:active{transform:scale(.995)}
+.opt b{width:30px;height:30px;border-radius:50%;background:var(--fill);display:grid;place-items:center;font-size:13px;flex:none}
+.opt.on{border-color:var(--blue);background:var(--blue-soft)} .opt.on b{background:var(--gold);color:var(--dark)}
+.opt.ok{border-color:var(--green);background:var(--green-soft)} .opt.bad{border-color:var(--red);background:var(--red-soft)}
+.qnav{display:flex;flex-wrap:wrap;gap:6px}
+.qnav button{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-weight:600;font-size:13px}
+.qnav button.a{background:var(--blue-soft);border-color:transparent;color:var(--blue)} .qnav button.c{outline:2px solid var(--blue)}
+.ring{width:190px;height:190px;position:relative;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:12;stroke-linecap:round}
+.ring .fg{stroke:var(--blue);animation:ring 1.1s ease forwards}
+@keyframes ring{from{stroke-dashoffset:503}}
+.ring .t{position:absolute;inset:0;display:grid;place-items:center;font-size:44px;font-weight:700;letter-spacing:-.03em}
+.code{font-size:72px;font-weight:800;color:var(--blue);letter-spacing:.14em;font-variant-numeric:tabular-nums}
+
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.28);backdrop-filter:blur(6px);display:grid;place-items:center;z-index:50;padding:20px;animation:fade .15s}
+.modal{background:var(--card);border-radius:22px;padding:26px;width:min(520px,100%);max-height:88vh;overflow:auto;box-shadow:0 24px 80px rgba(0,0,0,.25);animation:pop .2s ease;display:flex;flex-direction:column;gap:16px}
+.modal.wide{width:min(760px,100%)}
+#toasts{position:fixed;right:22px;bottom:22px;display:flex;flex-direction:column;gap:8px;z-index:60}
+.toast{background:rgba(29,29,31,.92);color:#fff;padding:11px 18px;border-radius:14px;font-size:14px;animation:rise .25s ease;max-width:380px}
+.toast.err{background:var(--red)}
+.center{min-height:100vh;display:grid;place-items:center;padding:24px}
+
+
+/* ===== Diplomat · тетрадь учителя: чернила, точечная сетка, жёлтый маркер ===== */
+:root{--bg:#F1F2F6;--card:#FFFFFF;--ink:#0F1531;--ink2:#5A6079;--ink3:#9A9FB4;--line:#E2E4EC;--fill:#F1F2F7;--blue:#2E43A6;--blue-soft:#E9EDFB;--gold:#F2B422;--dark:#0F1531;--navy:#0F1531;
+  --r:20px;--r-s:12px;--shadow:0 1px 0 rgba(15,21,49,.04);--font:"Onest",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;--hl:rgba(242,180,34,.5)}
+body{background-color:var(--bg);background-image:radial-gradient(rgba(15,21,49,.13) 1px,transparent 1.3px);background-size:24px 24px;font:15px/1.5 var(--font);letter-spacing:-.005em}
+h1{font-size:40px;font-weight:800;letter-spacing:-.04em;line-height:1.08}
+h2{font-size:19px;font-weight:700;letter-spacing:-.02em}h3{font-weight:700}
+.head{align-items:center}.head h1{display:inline;background:linear-gradient(transparent 60%,var(--hl) 60%,var(--hl) 92%,transparent 92%);padding:0 4px;margin-left:-4px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+/* шапка */
+.shell{display:block;min-height:100%}
+.side{position:sticky;top:0;z-index:20;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:12px 18px;padding:12px 28px 0;background:rgba(255,255,255,.94);color:var(--ink);border-bottom:1px solid var(--line);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.brand{padding:0;gap:11px;flex:none}.brand img{width:40px;height:40px}
+.brand b{font-size:17px;font-weight:800;letter-spacing:-.02em;color:var(--ink)}.brand small{font-size:12px;letter-spacing:0;color:var(--ink2);font-weight:500;margin-top:2px}
+.navs{display:flex;gap:4px;order:3;width:100%;margin:0 -28px;padding:8px 28px 10px;border-top:1px solid var(--line);justify-content:flex-start;overflow-x:auto;scrollbar-width:none}.navs::-webkit-scrollbar{display:none}
+.nav{width:auto;flex:none;padding:10px 13px;border-radius:12px;color:var(--ink2);font-weight:600;font-size:14.5px;position:relative;gap:8px}
+.nav svg.ic{width:18px;height:18px}
+.nav:hover{background:var(--fill);color:var(--ink)}
+.nav.on{background:var(--ink);color:#fff;font-weight:600}
+.nav.on::after{content:"";position:absolute;left:14px;right:14px;bottom:4px;height:2px;border-radius:2px;background:var(--gold)}
+.side .foot{margin:0 0 0 auto;padding:0;border:0;flex-direction:row;align-items:center;gap:10px;color:var(--ink2);flex:none}
+.me-card{color:var(--ink);gap:9px}.me-card .av{width:36px;height:36px;border-radius:11px;background:var(--gold);color:var(--ink);font-size:13px}
+.me-card .nm{display:flex;flex-direction:column;line-height:1.2}.me-card .nm b{font-size:14px}.me-card .nm small{font-size:12px;color:var(--ink2);display:flex;align-items:center}
+.dot{width:7px;height:7px;margin-right:5px}
+.stale{background:#FFF3D6;color:#7A5300;text-align:center;padding:8px;font-size:13px;font-weight:500}
+.top{position:static;padding:22px 28px 0;background:none;border:0;-webkit-backdrop-filter:none;backdrop-filter:none;max-width:1320px;margin:0 auto}
+.top .who{display:none}
+.cap{background:none;color:var(--ink2);padding:0;font-size:12.5px;letter-spacing:.02em;text-transform:none;font-weight:600}
+.page{padding:14px 28px 72px;margin:0 auto;gap:20px}
+/* карточки */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:24px}
+.card.hover{transition:transform .2s ease,border-color .2s,box-shadow .2s}
+.card.hover:hover{transform:translateY(-3px);border-color:var(--ink);box-shadow:0 12px 30px rgba(15,21,49,.08)}
+.kpi .l{font-size:13px;font-weight:600;color:var(--ink2)}.kpi .v{font-size:46px;font-weight:800;letter-spacing:-.05em;line-height:1.05;margin-top:8px}.kpi .s{color:var(--ink3);font-size:12.5px}
+.gradeTile .n{color:var(--ink);font-weight:800}
+.hero{background-color:var(--ink);background-image:radial-gradient(rgba(255,255,255,.09) 1px,transparent 1.3px);background-size:22px 22px;border-radius:26px;padding:36px 40px;box-shadow:none;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;left:-90px;bottom:-110px;width:240px;height:240px;border-radius:50%;border:38px solid rgba(242,180,34,.16)}
+.hero h1{font-size:42px;color:#fff}.hero .sub{letter-spacing:.08em;color:rgba(255,255,255,.55)}
+.hero .slogan{border-radius:10px;padding:8px 16px;font-size:15px}
+.hero .btn{background:#fff;border-color:#fff;color:var(--ink)}.hero .btn:hover{background:var(--gold);border-color:var(--gold)}
+/* кнопки */
+.btn{height:42px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink);font-weight:600;font-size:14.5px;transition:background .16s,border-color .16s,color .16s,transform .1s,box-shadow .16s;filter:none!important}
+.btn:hover{border-color:#BFC4D6;background:#FAFBFD}.btn:active{transform:translateY(1px)}
+.btn.pri{background:var(--ink);border-color:var(--ink);color:#fff;box-shadow:inset 0 -3px 0 var(--gold)}
+.btn.pri:hover{background:var(--blue);border-color:var(--blue)}
+.btn.big{height:52px;padding:0 28px;font-size:16px;border-radius:14px}
+.btn.small{height:34px;padding:0 12px;font-size:13px;border-radius:10px}
+.btn.ghost{height:auto;border:0;background:none;color:var(--blue);padding:6px 8px;box-shadow:none}.btn.ghost:hover{background:var(--blue-soft)}
+.btn.danger{color:#D23B41}.btn.danger:hover{background:#FDECEC;border-color:#F3C6C8}
+.btn.sq{width:40px;height:40px;padding:0;border-radius:12px}
+.btn[disabled]{opacity:.4}
+.iconbtn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);box-shadow:none;background:#fff}
+.chip{border-radius:8px;padding:4px 9px;font-weight:600}
+.seg{background:#E7E9F0;border-radius:13px;padding:4px}.seg button{border-radius:10px;font-weight:600;color:var(--ink2)}.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(15,21,49,.12)}
+.field{font-weight:600;color:var(--ink2);font-size:13px}
+.in{min-height:46px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:15.5px;padding:11px 14px}
+.in:hover{border-color:#C9CDDB}.in:focus{border-color:var(--ink);box-shadow:0 0 0 4px rgba(46,67,166,.12)}
+input[type=checkbox],input[type=radio]{accent-color:var(--ink);width:17px;height:17px}
+.bar{height:8px;background:#ECEEF4}.bar i{background:var(--ink)}
+.tbl th{text-transform:none;letter-spacing:0;font-size:12.5px;color:var(--ink2)}.tbl tr.click:hover td{background:#F7F8FB}
+.mark{border-radius:10px}.lvl .dots i.on{background:var(--ink)}
+.empty{border:1.5px dashed #D3D6E1;border-radius:16px;background:rgba(255,255,255,.6)}
+.opt{border-radius:14px;border:1.5px solid var(--line);padding:16px 18px}.opt b{border-radius:9px;background:var(--fill)}
+.opt.on{border-color:var(--ink);background:var(--blue-soft)}.opt.on b{background:var(--ink);color:#fff}
+.qnav button{border-radius:10px}.qnav button.a{background:var(--ink);color:#fff}
+.ring .fg{stroke:var(--ink)}.code{color:var(--ink);letter-spacing:.12em}
+.modal{border-radius:24px;border:1px solid var(--line);box-shadow:0 30px 80px rgba(15,21,49,.25)}
+.ov{background:rgba(15,21,49,.35)}
+.toast{background:var(--ink);color:#fff;border-radius:12px;border-left:4px solid var(--gold);padding:12px 18px;box-shadow:0 12px 30px rgba(15,21,49,.25)}
+.toast.err{background:#B42328;border-left-color:#fff}
+.pop{border:1px solid var(--line);border-radius:18px}
+/* вход */
+.login{background-color:var(--ink);background-image:radial-gradient(rgba(255,255,255,.08) 1px,transparent 1.3px);background-size:24px 24px}
+.login .box{border-radius:26px;padding:36px 34px;box-shadow:0 40px 90px rgba(0,0,0,.35);border-top:5px solid var(--gold);gap:14px;animation:rise .45s ease}
+.login h1{font-size:28px}.login h1{background:linear-gradient(transparent 62%,var(--hl) 62%,var(--hl) 92%,transparent 92%);align-self:center;padding:0 4px}
+.login input{background:#fff;border:1px solid var(--line);min-height:48px}.login input:focus{outline:0;border-color:var(--ink);box-shadow:0 0 0 4px rgba(46,67,166,.12)}
+.login .lb{border-radius:14px;height:52px;padding:0;background:var(--ink);box-shadow:inset 0 -3px 0 var(--gold);transition:background .16s}.login .lb:hover{background:var(--blue)}
+.login .lb.sec{background:#fff;color:var(--ink);border:1px solid var(--line);box-shadow:none}.login .lb.sec:hover{background:var(--fill)}
+.page.enter .card{animation:rise .32s ease backwards}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (max-width:900px){.nav span{display:none}.nav{padding:10px 12px}.me-card .nm{display:none}}
+@media (max-width:700px){.side{flex-wrap:wrap;padding:10px 14px;gap:10px}.navs{margin:0 -14px;padding:8px 14px}.side .foot .btn.small{display:none}.brand small{display:none}.top,.page{padding-left:14px;padding-right:14px}h1{font-size:30px}.hero{padding:26px}}
+.by{display:inline-flex;align-items:center;height:28px;padding:0 11px;border-radius:9px;background:var(--gold);color:var(--ink);font-size:12.5px;font-weight:700;letter-spacing:-.005em;white-space:nowrap;margin-left:6px;box-shadow:inset 0 -2px 0 rgba(15,21,49,.12)}
+@media (max-width:700px){.by{font-size:11px;height:24px;padding:0 8px}}
+
+/* ===== Админ-панель: тёмная аналитика Diplomat ===== */
+.adm{min-height:100vh;background:#0B0F24;background-image:radial-gradient(900px 500px at 85% -10%,rgba(46,67,166,.45),transparent 60%),radial-gradient(700px 400px at -10% 110%,rgba(242,180,34,.14),transparent 60%);color:#E9ECF7;font-family:var(--font)}
+.ad-top{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:20px;padding:14px 32px;background:rgba(11,15,36,.82);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.08);flex-wrap:wrap}
+.ad-brand{display:flex;align-items:center;gap:11px}.ad-brand img{width:40px;height:40px;border-radius:50%}.ad-brand b{display:block;font-size:17px;font-weight:800;color:#fff}.ad-brand small{color:#8E95B5;font-size:12px}
+.ad-nav{display:flex;gap:4px;background:rgba(255,255,255,.06);padding:4px;border-radius:13px;margin:0 auto}.ad-nav button{border:0;background:none;color:#AEB4D0;padding:9px 18px;border-radius:10px;font-weight:600;cursor:pointer;font-size:14.5px}.ad-nav button.on{background:#F2B422;color:#0B0F24}.ad-nav button:hover:not(.on){color:#fff}
+.ad-me{display:flex;align-items:center;gap:10px}.ad-me span{display:flex;flex-direction:column;text-align:right;font-weight:700;font-size:14px}.ad-me small{color:#8E95B5;font-weight:500;font-size:12px}
+.ad-ib{width:40px;height:40px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;font-size:17px;cursor:pointer}.ad-ib:hover{background:rgba(255,255,255,.12)}
+.ad-main{max-width:1320px;margin:0 auto;padding:28px 32px 80px;display:flex;flex-direction:column;gap:20px}
+.ad-hd{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}.adm h1{font-size:40px;font-weight:800;letter-spacing:-.04em;color:#fff;background:none;-webkit-text-fill-color:#fff}.ad-sub{font-size:20px;color:#8E95B5;font-weight:600;-webkit-text-fill-color:#8E95B5}
+.ad-f{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.ad-f select,.ad-card input,.ad-card select{height:42px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#fff;padding:0 12px;font:inherit;font-size:14.5px}.ad-f option,.ad-card option{color:#0B0F24}.ad-at{color:#6F7699;font-size:12.5px}
+.ad-btn{height:42px;padding:0 18px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;font-weight:700;cursor:pointer;font:inherit;font-weight:700}.ad-btn.pri{background:#F2B422;border-color:#F2B422;color:#0B0F24}.ad-btn.ghost{border-color:transparent}
+.ad-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.ad-k{border-radius:20px;padding:20px 22px;background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.09);animation:rise .4s ease backwards}.ad-k:nth-child(2){animation-delay:.05s}.ad-k:nth-child(3){animation-delay:.1s}.ad-k:nth-child(4){animation-delay:.15s}
+.ad-k .l{color:#8E95B5;font-size:13px;font-weight:600}.ad-k .v{font-size:48px;font-weight:800;letter-spacing:-.05em;line-height:1.1;margin-top:6px;color:#fff;font-variant-numeric:tabular-nums}.ad-k .v.sm{font-size:24px;letter-spacing:-.02em;margin-top:14px}.ad-k .s{color:#6F7699;font-size:12.5px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ad-k:first-child .v{color:#F2B422}
+.ad-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.span2{grid-column:span 2}
+.ad-card{border-radius:22px;padding:22px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:12px;min-width:0}
+.ad-card label{display:flex;flex-direction:column;gap:6px;color:#AEB4D0;font-size:13px;font-weight:600}.ad-err{color:#FF8A8F;font-size:13px;min-height:16px}
+.ad-ct{font-size:13px;font-weight:700;color:#AEB4D0;letter-spacing:.01em}
+.ad-empty{color:#6F7699;padding:26px 0;text-align:center;border:1px dashed rgba(255,255,255,.12);border-radius:14px}
+.ad-load{padding:80px 0;text-align:center;color:#AEB4D0;font-size:17px}
+.pod{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:12px;align-items:end;padding-top:6px}
+.pod-i{border:0;cursor:pointer;color:#fff;text-align:center;font:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;transition:transform .2s}.pod-i:hover{transform:translateY(-4px)}
+.pod-n{font-size:22px;font-weight:800;letter-spacing:-.02em}.pod-v{font-size:44px;font-weight:800;letter-spacing:-.05em;line-height:1}.pod-v small{font-size:20px;color:#8E95B5}.pod-s{color:#8E95B5;font-size:12.5px;margin-bottom:10px}
+.pod-b{width:100%;border-radius:16px 16px 6px 6px;display:grid;place-items:center;font-size:28px;font-weight:800;animation:podUp .7s cubic-bezier(.2,.8,.2,1) backwards}
+.p1 .pod-b{height:150px;background:linear-gradient(180deg,#FFD25E,#E39A12);color:#0B0F24;box-shadow:0 20px 50px rgba(242,180,34,.3)}.p2 .pod-b{height:110px;background:linear-gradient(180deg,#D7DCEB,#9AA3BF);color:#0B0F24;animation-delay:.1s}.p3 .pod-b{height:84px;background:linear-gradient(180deg,#E7A97D,#A7623A);color:#fff;animation-delay:.2s}
+@keyframes podUp{from{transform:scaleY(0);transform-origin:bottom}to{transform:scaleY(1)}}
+.ad-bars{display:flex;flex-direction:column;gap:11px}.ad-bar{display:grid;grid-template-columns:minmax(0,1.2fr) 1.4fr 44px;gap:10px;align-items:center;font-size:13.5px}.ad-bar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#D5D9EA}.ad-bar i{height:8px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden}.ad-bar em{display:block;height:100%;border-radius:9px;animation:grow .8s ease}.ad-bar b{text-align:right;font-variant-numeric:tabular-nums}
+em.g5,.ad-bar em.g5{background:#3DD68C;color:#3DD68C}em.g4{background:#7C93FF;color:#7C93FF}em.g3{background:#F2B422;color:#F2B422}em.g2{background:#FF6B70;color:#FF6B70}
+.ad-feed em,.ad-tbl em,.ad-pr em,.ad-tl em{font-style:normal;font-weight:800;background:none!important}
+.ad-par{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.ad-pc{border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);padding:14px;display:flex;flex-direction:column;gap:6px}
+.ad-pg{font-size:30px;font-weight:800;letter-spacing:-.04em;color:#F2B422;line-height:1}.ad-pg small{font-size:13px;color:#8E95B5;font-weight:600;margin-left:6px;letter-spacing:0}
+.ad-pr{display:flex;align-items:center;gap:9px;border:0;background:none;color:#fff;font:inherit;padding:5px 4px;border-radius:9px;cursor:pointer;text-align:left}.ad-pr:hover{background:rgba(255,255,255,.07)}.ad-pr span{flex:1;font-weight:600}
+b.m1,b.m2,b.m3,.ad-tl b{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:13px;font-weight:800;background:rgba(255,255,255,.08);flex:none}b.m1{background:#F2B422;color:#0B0F24}b.m2{background:#C9CFE2;color:#0B0F24}b.m3{background:#C9835A;color:#fff}
+.ad-tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}.ad-tl li{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}.ad-tl li:last-child{border:0}.ad-tl span{flex:1;font-weight:700;display:flex;flex-direction:column;min-width:0}.ad-tl small{color:#8E95B5;font-weight:500;font-size:12px}.ad-tl em{font-style:normal;font-weight:800;color:#F2B422}
+.ad-feed{display:flex;flex-direction:column}.ad-feed button{display:flex;align-items:center;gap:10px;border:0;background:none;color:#E9ECF7;font:inherit;text-align:left;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer}.ad-feed button:last-child{border:0}.ad-feed span{flex:1;min-width:0}.ad-feed small{display:block;color:#8E95B5;font-size:12px}
+.ad-back{border:0;background:none;color:#F2B422;font:inherit;font-weight:700;cursor:pointer;padding:0;margin-bottom:6px}
+.ad-tbl{width:100%;border-collapse:collapse;font-size:14px}.ad-tbl th{text-align:left;color:#8E95B5;font-weight:600;font-size:12.5px;padding:8px 10px;white-space:nowrap}.ad-tbl td{padding:12px 10px;border-top:1px solid rgba(255,255,255,.07)}.ad-tbl tr:hover td{background:rgba(255,255,255,.03)}
+@media (max-width:980px){.ad-kpis{grid-template-columns:1fr 1fr}.ad-grid{grid-template-columns:1fr}.span2{grid-column:auto}.ad-nav{margin:0;order:3;width:100%}.ad-main,.ad-top{padding-left:16px;padding-right:16px}.ad-me span{display:none}}
+.qr{padding:14px;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:inset 0 -3px 0 var(--gold)}.qr img,.qr canvas{display:block;width:230px;height:230px}
 </style>
 </head>
 <body>
-<main id="app"><div class="mid"><div class="brand"><img src="logo.png" alt="Эмблема Diplomat International School"><div class="t">DIPLOMAT</div><div class="s">INTERNATIONAL SCHOOL</div></div><p class="sub">Загрузка…</p></div></main>
-<div class="credit">By Mirtemirov Ozodbek</div>
-<noscript><p style="color:#fff;text-align:center">Для игры включите JavaScript в браузере.</p></noscript>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="config.js"></script>
-<script src="backend.js"></script>
+
+<div id="app"><div class="center muted">Загрузка платформы…</div></div>
+<div id="modal"></div>
+<div id="toasts"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="bank5.js"></script>
+<script src="bank6.js"></script>
+<script src="bank7.js"></script>
+<script src="bank8.js"></script>
+<script src="bank9.js"></script>
 <script>
 "use strict";
-const $ = (s) => document.querySelector(s);
-const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const COLORS = ["var(--red)", "var(--blue)", "var(--yellow)", "var(--green)"];
-const SHAPES = ['<path d="M12 3l10 18H2z"/>', '<path d="M12 2l10 10-10 10L2 12z"/>', '<circle cx="12" cy="12" r="10"/>', '<rect x="3" y="3" width="18" height="18" rx="2"/>'];
-const shape = (i, n) => `<svg viewBox="0 0 24 24" width="${n}" height="${n}" fill="#fff" aria-hidden="true">${SHAPES[i % 4]}</svg>`;
-/* Each browser tab remembers its own player, so a reload keeps you in the game. */
-const store = (v) => { try { if (v === undefined) return JSON.parse(sessionStorage.getItem("kl-player")); if (v === null) sessionStorage.removeItem("kl-player"); else sessionStorage.setItem("kl-player", JSON.stringify(v)); } catch (e) { return null; } };
-const newPid = () => "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+let PLATFORM_URL="https://claude.ai/artifact/2uFt8uQ1ewUkrQtg8Lrr8d";if(/^https?:/.test(location.href)&&!/claude\.ai|claudeusercontent|claude\.site/.test(location.host))PLATFORM_URL=location.origin+location.pathname;
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const avg=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:0;
+const r0=x=>Math.round(x), r1=x=>(Math.round(x*10)/10).toLocaleString('ru-RU');
+const fdate=t=>new Date(t).toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
+const fdt=t=>new Date(t).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+const plural=(n,a,b,c)=>{const m=n%100,k=n%10;return n+' '+(m>10&&m<20?c:k===1?a:k>=2&&k<=4?b:c)};
+const IC={home:"M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",grid:"M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z",test:"M9 11l3 3 8-8M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h10",trophy:"M8 4h8v5a4 4 0 0 1-8 0zM8 6H4v1a4 4 0 0 0 4 4M16 6h4v1a4 4 0 0 1-4 4M12 13v4M8 20h8",chart:"M4 20V10M10 20V4M16 20v-7M22 20H2",book:"M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5M8 7h7",gear:"M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1",bell:"M6 16v-5a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0",plus:"M12 5v14M5 12h14",trash:"M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6",edit:"M4 20h4L19 9l-4-4L4 16zM13 7l4 4",copy:"M9 9h11v11H9zM5 15V4h11",play:"M7 4l13 8-13 8z",back:"M15 5l-7 7 7 7",users:"M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 19a6 6 0 0 1 12 0M17 11a3 3 0 1 0-1-5.8M21 19a6 6 0 0 0-4-5.6",x:"M6 6l12 12M18 6L6 18",clock:"M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"};
+const ic=n=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="${IC[n]}"/></svg>`;
+const LEVELS=[
+ {n:1,name:'Очень лёгкий',k:1.0,desc:'Простые вопросы на базовые знания.'},
+ {n:2,name:'Лёгкий',k:1.2,desc:'Простые вопросы с небольшими элементами размышления.'},
+ {n:3,name:'Средний',k:1.5,desc:'Стандартная школьная сложность, проверка понимания темы.'},
+ {n:4,name:'Сложный',k:1.8,desc:'Глубокие вопросы, нужен анализ информации.'},
+ {n:5,name:'Очень сложный',k:2.0,desc:'Максимальная сложность, аналитическое мышление.'}];
+const LV=n=>LEVELS[(n||1)-1]||LEVELS[0];
+const MARK_NAMES={5:'отлично',4:'хорошо',3:'удовлетворительно',2:'неудовлетворительно',1:'очень низкий результат'};
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function toast(msg,err){const d=document.createElement('div');d.className='toast'+(err?' err':'');d.textContent=msg;$('#toasts').appendChild(d);setTimeout(()=>d.remove(),err?6000:3200)}
+function ls(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
 
-/* screen: code | nick | play ; P = player {code,pid,nick}; ST = latest game state */
-let screen = "code", P = null, ST = null, off = null, err = "", busy = false;
-let answered = {}, seenQ = -1, qSeenAt = 0, timer = null;
+/* ---------- store ---------- */
+const COLS=['grades','sections','tests','runs','sessions','materials','app'];
+/* ---------- учителя: вход по имени, фамилии и паролю ---------- */
+let me=ls('kl-me');
+const cp=c=>c==='sessions'?'sessions':'t/'+me.tid+'/'+c;
+const normName=x=>x.trim().replace(/\s+/g,' ').toLowerCase();
+async function sha(x){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(x));return [...new Uint8Array(b)].map(v=>v.toString(16).padStart(2,'0')).join('')}
+const BOOT_ADMIN={id:'ue85eb446888aa0d128e3',first:'Администратор',last:'Diplomat',salt:'c3d67321b3c87d13',hash:'8b686ccdb7228e468306db40d4a49123180c9f0f0c2a55d181ea15f36919b481',role:'admin'};
+async function getAcc(id){const r=await getAcc0(id);return r||(id===BOOT_ADMIN.id?BOOT_ADMIN:null)}
+async function getAcc0(id){if(db){const d=await db.doc('accounts/'+id).get();return d.exists?d.data():null}return (ls('kl-accounts')||{})[id]||null}
+async function setAcc(id,a){if(db)await db.doc('accounts/'+id).set(a);else{const all=ls('kl-accounts')||{};all[id]=a;ls('kl-accounts',all)}}
+let LG={mode:'in',err:'',busy:false};
+function loginView(){return `<div class="login"><form class="box" id="lgForm" autocomplete="on">
+  <img src="logo.png" alt=""><h1>${LG.mode==='in'?'Вход для учителя':'Новый учитель'}</h1>
+  <div class="muted small" style="text-align:center">${LG.mode==='in'?'Введите своё имя, фамилию и пароль.':'Создайте свой кабинет: у каждого учителя свои классы, тесты и результаты.'}</div>
+  <label>Имя<input id="lgFirst" name="given-name" autocomplete="given-name" required value="${esc(LG.first||'')}"></label>
+  <label>Фамилия<input id="lgLast" name="family-name" autocomplete="family-name" required value="${esc(LG.last||'')}"></label>
+  <label>Пароль<input id="lgPass" type="password" autocomplete="${LG.mode==='in'?'current-password':'new-password'}" required minlength="4"></label>
+  ${LG.mode==='up'?'<label>Повторите пароль<input id="lgPass2" type="password" autocomplete="new-password" required></label>':''}
+  <div class="err">${esc(LG.err)}</div>
+  <button class="lb" type="submit"${LG.busy?' disabled':''}>${LG.busy?'Подождите…':LG.mode==='in'?'Войти':'Создать кабинет'}</button>
+  <button class="lb sec" type="button" data-a="lg-mode">${LG.mode==='in'?'Я новый учитель — создать кабинет':'У меня уже есть кабинет — войти'}</button>
+  <button class="btn ghost small" type="button" data-a="go" data-h="join" style="align-self:center">Я ученик — ввести код теста</button>
+</form></div>`}
+async function lgSubmit(){const first=$('#lgFirst').value.trim(),last=$('#lgLast').value.trim(),pass=$('#lgPass').value;LG.first=first;LG.last=last;
+  if(first.length<2||last.length<2){LG.err='Введите имя и фамилию полностью';return render()}
+  if(pass.length<4){LG.err='Пароль — не меньше 4 символов';return render()}
+  const tid='u'+(await sha(normName(first+' '+last))).slice(0,20);LG.busy=true;LG.err='';render();
+  try{const acc=await getAcc(tid);
+    if(LG.mode==='up'){
+      if(acc){LG.busy=false;LG.err='Учитель с таким именем и фамилией уже зарегистрирован. Нажмите «Войти».';return render()}
+      const salt=uid()+uid();await setAcc(tid,{first,last,salt,hash:await sha(salt+pass),created:Date.now()})}
+    else{if(!acc){LG.busy=false;LG.err='Такой учитель не найден. Проверьте имя и фамилию или создайте кабинет.';return render()}
+      if(await sha(acc.salt+pass)!==acc.hash){LG.busy=false;LG.err='Неверный пароль';return render()}}
+    me={tid,first,last,role:(acc&&acc.role)||'teacher'};ls('kl-me',me);LG={mode:'in',err:'',busy:false};if(me.role==='admin'){ready=true;AD.st='idle';toast('Добро пожаловать, '+first+'!');return go('home')}await loadData();
+    if(!S.grades.length)ensureGrades();if(!meta().teacher)setMeta({teacher:first+' '+last});toast('Добро пожаловать, '+first+'!');go('home')}
+  catch(e){LG.busy=false;LG.err='Не удалось связаться с сервером. Повторите попытку.';render()}}
+document.addEventListener('submit',e=>{if(e.target&&e.target.id==='lgForm'){e.preventDefault();
+  if(LG.mode==='up'&&$('#lgPass2')&&$('#lgPass2').value!==$('#lgPass').value){LG.err='Пароли не совпадают';LG.first=$('#lgFirst').value;LG.last=$('#lgLast').value;return render()}lgSubmit()}});
 
-function topbar() {
-  const sc = ST && ST.scores && P ? ST.scores[P.pid] : null;
-  return `<div class="top"><img src="logo.png" alt=""><b>DIPLOMAT</b><span class="sp"></span>${P ? `<span class="pill">${esc(P.nick)}</span>` : ""}${sc ? `<span class="pill gold">${sc[0]}</span>` : ""}</div>`;
-}
-function render() {
-  const app = $("#app");
-  if (screen === "code") {
-    app.innerHTML = `<div class="mid"><div class="brand"><img src="logo.png" alt="Эмблема Diplomat International School"><div class="t">DIPLOMAT</div><div class="s">INTERNATIONAL SCHOOL</div></div>
-      <h1 class="big" style="font-size:24px;margin:0">Вход в игру</h1>
-      <form class="card" id="fCode"><label class="lbl" for="code">Код игры с экрана учителя</label><input class="in code" id="code" maxlength="6" autocomplete="off" autocapitalize="characters" inputmode="text" placeholder="КОД" value="${esc(new URLSearchParams(location.search).get("code") || "")}">
-      <button class="btn gold" ${busy ? "disabled" : ""}>Войти</button>${err ? `<div class="err">${esc(err)}</div>` : ""}</form>
-      <div class="foot">${KL.mode === "local" ? "Режим проверки: работает только в этом браузере.<br>" : ""}<a href="teacher.html">Кабинет учителя</a></div></div>`;
-    const i = $("#code"); if (i && !i.value) i.focus();
-    return;
-  }
-  if (screen === "nick") {
-    app.innerHTML = `<div class="mid">${topbar()}<form class="card" id="fNick"><div class="lbl">Игра ${esc(P.code)}${ST && ST.cls ? " · " + esc(ST.cls) : ""}</div><label class="big" style="font-size:24px" for="nick">Как тебя показать на экране?</label>
-      <input class="in" id="nick" maxlength="20" autocomplete="off" placeholder="Имя или ник">
-      <button class="btn gold" ${busy ? "disabled" : ""}>Готово</button>${err ? `<div class="err">${esc(err)}</div>` : ""}<div class="lbl" style="font-weight:400">Имя видно только во время игры и не сохраняется.</div></form>
-      <button class="link" data-a="back">Другой код</button></div>`;
-    $("#nick").focus();
-    return;
-  }
-  app.innerHTML = topbar() + `<div class="mid">${playView()}</div>`;
-}
-function playView() {
-  const s = ST;
-  if (!s) return `<div class="big">Игра закрыта</div><div class="sub">Учитель завершил игру.</div><button class="btn gold" data-a="back">Ввести другой код</button>`;
-  if ((s.kicked || []).includes(P.pid)) return `<div class="big">Вас убрали из игры</div><div class="sub">Если это ошибка, войдите снова с другим именем.</div><button class="btn gold" data-a="back">Войти снова</button>`;
-  const me = s.scores ? s.scores[P.pid] : null;
-  if (s.phase === "lobby") return `<div class="big">Ты в игре!</div><span class="nick">${esc(P.nick)}</span><div class="sub">Найди своё имя на доске. Игра начнётся, когда учитель нажмёт «Начать».</div><div class="dots"><i></i><i></i><i></i></div>`;
-  if (s.phase === "question") {
-    if (answered[s.qi] !== undefined) return `<div class="big">Ответ принят</div><div class="sub">Ждём остальных…</div><div class="dots"><i></i><i></i><i></i></div>`;
-    const left = Math.max(0, s.secs - (Date.now() - qSeenAt) / 1000);
-    return `<div class="row" style="display:flex;justify-content:space-between;color:var(--muted);font-weight:700"><span>Вопрос ${s.qi + 1} из ${s.n}</span><span id="tl">${Math.ceil(left)} с</span></div>
-      <div class="timebar"><i id="tb" style="width:${(left / s.secs) * 100}%"></i></div>
-      ${s.q ? `<div class="qbox">${esc(s.q.q)}</div>` : ""}
-      <div class="answers">${(s.q ? s.q.o : []).map((o, i) => `<button class="ans" style="background:${COLORS[i % 4]}" data-a="pick" data-i="${i}" ${busy ? "disabled" : ""}>${shape(i, 34)}<span>${esc(o)}</span></button>`).join("")}</div>
-      ${err ? `<div class="err" style="color:#FF9A9A">${esc(err)}</div>` : ""}`;
-  }
-  if (s.phase === "reveal" || s.phase === "board") {
-    const lo = me ? me[3] : -1, lp = me ? me[2] : 0;
-    const cls = lo === 1 ? "ok" : lo === 0 ? "bad" : "none";
-    const h = lo === 1 ? "Верно!" : lo === 0 ? "Неверно" : "Нет ответа";
-    return `<div class="res ${cls}"><div class="h">${h}</div><div class="p">+${lp}</div>${s.q && s.c !== undefined ? `<div style="font-weight:600">Правильный ответ: ${esc(s.q.o[s.c])}</div>` : ""}</div>
-      <div class="stats"><div class="stat"><small>Очки</small><b>${me ? me[0] : 0}</b></div><div class="stat"><small>Место</small><b>${me ? me[1] : "—"}${s.total ? `<small style="display:inline"> из ${s.total}</small>` : ""}</b></div></div>
-      <div class="sub">Смотри на доску</div>`;
-  }
-  if (s.phase === "end") {
-    return `<div class="big">Игра окончена!</div><div class="stats"><div class="stat"><small>Твои очки</small><b>${me ? me[0] : 0}</b></div><div class="stat"><small>Место</small><b>${me ? me[1] : "—"}</b></div></div>
-      <div class="toplist">${(s.top || []).map((t, i) => `<div class="trow${me && me[1] === i + 1 ? " me" : ""}"><span>${i + 1}</span><span>${esc(t[0])}</span><span class="sp"></span><span>${t[1]}</span></div>`).join("")}</div>
-      <button class="link" data-a="back">Выйти</button>`;
-  }
-  return `<div class="dots"><i></i><i></i><i></i></div>`;
-}
+const S={};COLS.forEach(c=>S[c]=[]);
+let db=null,user=null,room=null,sample=null,isTeacher=true,ready=false,stale=false;
+const chains={};
+function chain(key,fn){const p=(chains[key]||Promise.resolve()).then(fn,fn);chains[key]=p.catch(()=>{});return p}
+function dbErr(e){const m=e&&e.code==='quota_exceeded'?'Хранилище заполнено. Удалите старые тесты или материалы.':e&&e.code==='invalid_argument'?'Нет прав на изменение данных или запись слишком большая.':'Не удалось сохранить изменения. Проверьте соединение и повторите.';toast(m,true)}
+function put(col,id,data,quiet){const o=JSON.parse(JSON.stringify(data));delete o.id;const a=S[col],i=a.findIndex(x=>x.id===id);const rec={id,...o};if(i>=0)a[i]=rec;else a.push(rec);
+  if(col==='sessions')o.owner=me.tid;if(db)chain(col+'/'+id,()=>db.collection(cp(col)).doc(id).set(o)).catch(dbErr);else saveLocal();if(!quiet)render()}
+function del(col,id,quiet){S[col]=S[col].filter(x=>x.id!==id);if(db)chain(col+'/'+id,()=>db.collection(cp(col)).doc(id).delete()).catch(dbErr);else saveLocal();if(!quiet)render()}
+function saveLocal(){if(me)ls('kl-data-'+me.tid,S)}
+const meta=()=>S.app.find(x=>x.id==='meta')||{};
+const setMeta=p=>put('app','meta',{name:'Diplomat',teacher:'',th:[85,70,50,30],v:2,...meta(),...p});
+function log(text){const cur=(S.app.find(x=>x.id==='log')||{}).items||[];put('app','log',{items:[{t:Date.now(),x:text},...cur].slice(0,150)},true)}
+const logItems=()=>(S.app.find(x=>x.id==='log')||{}).items||[];
 
-function onState(state) {
-  ST = state;
-  if (state && state.phase === "question" && state.qi !== seenQ) { seenQ = state.qi; qSeenAt = Date.now(); err = ""; }
-  if (state && state.phase !== "question") err = "";
-  if (screen === "play") render();
-}
-async function connect() {
-  if (off) off();
-  off = KL.watchGame(P.code, onState);
-  if (!timer) timer = setInterval(() => {
-    if (!ST || ST.phase !== "question" || answered[ST.qi] !== undefined) return;
-    const left = Math.max(0, ST.secs - (Date.now() - qSeenAt) / 1000);
-    const tl = $("#tl"), tb = $("#tb");
-    if (tl) tl.textContent = Math.ceil(left) + " с";
-    if (tb) tb.style.width = (left / ST.secs) * 100 + "%";
-  }, 250);
-}
+/* ---------- domain ---------- */
+function parseQ(line){const p=line.split('|'),idx=[0,1,2,3],r=rng(hash(line));for(let i=3;i>0;i--){const j=Math.floor(r()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]]}return{q:p[0],o:idx.map(k=>p[k+1]),c:idx.indexOf(0)}}
+let _bi=null;
+function builtins(){if(_bi)return _bi;_bi=[];const B=window.BANK||{};for(const g in B){B[g].levels.forEach((l,i)=>_bi.push({id:`b${g}-${i+1}`,builtin:true,title:`${B[g].subject}, ${g} класс. Уровень ${i+1}`,subject:B[g].subject,topic:B[g].topic,gradeNum:+g,level:i+1,status:'ready',minutes:15+i*5,questions:l.map(parseQ)}))}return _bi}
+function allTests(){const ov=Object.fromEntries(S.tests.map(t=>[t.id,t]));const out=[];for(const b of builtins()){const o=ov[b.id];if(o){if(!o.deleted)out.push({...o,builtin:true,changed:true})}else out.push(b)}
+  for(const t of S.tests)if(!/^b\d+-\d$/.test(t.id))out.push(t);return out}
+const getTest=id=>allTests().find(t=>t.id===id);
+const gradeById=id=>S.grades.find(g=>g.id===id);
+const secById=id=>S.sections.find(s=>s.id===id);
+const sortedGrades=()=>[...S.grades].sort((a,b)=>(a.num||99)-(b.num||99)||a.name.localeCompare(b.name,'ru'));
+const secsOf=gid=>S.sections.filter(s=>s.gradeId===gid).sort((a,b)=>a.name.localeCompare(b.name,'ru'));
+const subjectFor=num=>(window.BANK&&BANK[num]?BANK[num].subject:(num<=6?'Естествознание':'География'));
+function markOf(p){const t=meta().th||[85,70,50,30];return p>=t[0]?5:p>=t[1]?4:p>=t[2]?3:p>=t[3]?2:1}
+function rows(f){f=f||{};const out=[];for(const r of S.runs){if(f.sectionId&&r.sectionId!==f.sectionId)continue;if(f.gradeId&&r.gradeId!==f.gradeId)continue;if(f.subject&&r.subject!==f.subject)continue;if(f.topic&&r.topic!==f.topic)continue;if(f.level&&r.level!==+f.level)continue;if(f.from&&r.ts<f.from)continue;if(f.to&&r.ts>f.to)continue;
+  for(const w of r.rows||[]){const pct=w.total?w.correct/w.total*100:0;out.push({...w,run:r,pct,mark:markOf(pct)})}}return out}
+const runsOf=f=>S.runs.filter(r=>(!f.sectionId||r.sectionId===f.sectionId)&&(!f.gradeId||r.gradeId===f.gradeId)).sort((a,b)=>b.ts-a.ts);
+const runAvg=r=>avg((r.rows||[]).map(w=>w.total?w.correct/w.total*100:0));
+function secStats(sec){const rs=rows({sectionId:sec.id});return{n:sec.count||0,tests:runsOf({sectionId:sec.id}).length,pct:avg(rs.map(r=>r.pct)),mark:avg(rs.map(r=>r.mark)),has:rs.length>0}}
+function gradeRows(t,answers){let c=0;t.questions.forEach((q,i)=>{if(answers[i]===q.c)c++});return{correct:c,total:t.questions.length}}
 
-document.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  if (busy) return;
-  if (e.target.id === "fCode") {
-    const code = $("#code").value.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
-    if (code.length !== 6) { err = "Код состоит из 6 букв и цифр."; return render(); }
-    busy = true; err = ""; render();
-    try {
-      const g = await KL.findGame(code);
-      if (!g) err = "Игра с таким кодом не найдена. Проверь код на доске.";
-      else if (g.state && g.state.phase === "end") err = "Эта игра уже закончилась.";
-      else { P = { code, pid: newPid(), nick: "" }; ST = g.state; screen = "nick"; }
-    } catch (x) { err = "Нет связи. Проверь интернет и попробуй ещё раз."; }
-    busy = false; render();
-  }
-  if (e.target.id === "fNick") {
-    const nick = $("#nick").value.replace(/\s+/g, " ").trim().slice(0, 20);
-    if (!nick) { err = "Напиши имя или ник."; return render(); }
-    busy = true; err = ""; render();
-    try {
-      await KL.joinGame(P.code, P.pid, nick);
-      P.nick = nick; store(P); screen = "play"; answered = {};
-      connect();
-    } catch (x) { err = "Не получилось войти. Возможно, игра уже закончилась."; }
-    busy = false; render();
-  }
-});
-document.addEventListener("click", async (e) => {
-  const el = e.target.closest("[data-a]");
-  if (!el) return;
-  if (el.dataset.a === "back") {
-    if (off) off(); off = null; store(null); P = null; ST = null; err = ""; screen = "code";
-    history.replaceState(null, "", location.pathname); render();
-  }
-  if (el.dataset.a === "pick" && !busy && ST && ST.phase === "question") {
-    const qi = ST.qi, i = +el.dataset.i;
-    busy = true; answered[qi] = i; render();
-    if (navigator.vibrate) try { navigator.vibrate(30); } catch (x) {}
-    try { await KL.answer(P.code, P.pid, qi, i); }
-    catch (x) { delete answered[qi]; err = /time|closed|row-level|violates/i.test(x.message) ? "Время на этот вопрос вышло." : "Ответ не отправился. Нажми ещё раз."; }
-    busy = false; render();
-  }
-});
+/* ---------- setup & clean-up ---------- */
+function ensureGrades(){if(S.grades.length)return;[1,2,3,4,5,6,7,8,9,10,11].forEach(n=>put('grades','g'+n,{name:n+' класс',num:n},true))}
+/* One-time clean-up of an earlier version: removes demonstration records and every per-student field. */
+function migrate(){if(!S.app.some(x=>x.id==='meta')||meta().v===2)return;
+  const gone=new Set(S.sections.filter(s=>s.demo).map(s=>s.id));
+  S.runs.filter(r=>r.demo||gone.has(r.sectionId)).forEach(r=>del('runs',r.id,true));gone.forEach(id=>del('sections',id,true));
+  S.sections.filter(s=>s.students).forEach(s=>{const o={...s,count:s.count||0};delete o.students;put('sections',s.id,o,true)});
+  S.runs.filter(r=>(r.rows||[]).some(w=>'name' in w||'sid' in w)).forEach(r=>put('runs',r.id,{...r,rows:r.rows.map(w=>({correct:w.correct,total:w.total,answers:w.answers,...(w.pid?{pid:w.pid}:{})}))},true));
+  S.sessions.forEach(x=>del('sessions',x.id,true));put('app','log',{items:[]},true);
+  const m={...meta(),v:2,name:meta().name==='Мой класс'?'Diplomat':meta().name};delete m.demo;put('app','meta',m)}
 
-(async function boot() {
-  if (KL.configError) { $("#app").innerHTML = '<div class="mid"><div class="big">Нет связи</div><div class="sub">Проверь интернет и обнови страницу.</div></div>'; return; }
-  const saved = store();
-  if (saved && saved.code && saved.pid && saved.nick) {
-    try {
-      const g = await KL.findGame(saved.code);
-      if (g && g.state && g.state.phase !== "end" && (await KL.isPlayer(saved.code, saved.pid))) {
-        P = saved; ST = g.state; screen = "play"; seenQ = -1; onState(g.state); connect(); render(); return;
-      }
-    } catch (x) {}
-    store(null);
-  }
-  render();
-})();
+/* ---------- ui state & routing ---------- */
+const UI={tab:'overview',bell:false,ratingGrade:null,testsGrade:0,enter:true};
+const M={B:null,F:{section:'',subject:'',topic:'',level:'',from:'',to:''}};
+let L=null,Q=null,R=null,G=null,J=null;
+const route=()=>(location.hash||'#home').slice(1)||'home';
+function go(h){UI.enter=true;UI.bell=false;if(route()===h)render();else location.hash=h;window.scrollTo(0,0)}
+window.addEventListener('hashchange',()=>{UI.enter=true;render()});
+let pend=false;
+function softRender(){const a=document.activeElement;if(a&&a.closest&&a.closest('#app')&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&!/radio|checkbox|date|file/.test(a.type)){pend=true;return}render()}
+document.addEventListener('focusout',()=>{if(pend){pend=false;setTimeout(softRender,50)}});
+const A={};
+document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(UI.bell&&!e.target.closest('.pop')&&!(el&&el.dataset.a==='bell')){UI.bell=false;render()}if(!el||el.disabled)return;const f=A[el.dataset.a];if(f){e.preventDefault();f(el.dataset,el,e)}});
+function setPath(o,p,v){const k=p.split('.');for(let i=0;i<k.length-1;i++)o=o[k[i]];o[k[k.length-1]]=v}
+document.addEventListener('input',e=>{const el=e.target;if(el.dataset&&el.dataset.set)setPath(M,el.dataset.set,el.dataset.num!==undefined?+el.value:el.value)});
+document.addEventListener('change',e=>{const el=e.target;if(el&&(el.id==='bGrade'||el.id==='bSubj'))render()});
+document.addEventListener('change',e=>{const el=e.target;if(el.id==='pdfFile')return pdfChosen(el);if(el.dataset&&el.dataset.re!==undefined)render()});
+document.addEventListener('submit',e=>{e.preventDefault();const b=(e.target.closest('.modal')||e.target).querySelector('[data-a][data-submit]');if(b)b.click()});
+function openModal(html,wide){$('#modal').innerHTML=`<div class="ov" data-a="ov"><div class="modal${wide?' wide':''}" role="dialog" aria-modal="true">${html}</div></div>`;const f=$('#modal input,#modal textarea,#modal select');if(f)f.focus()}
+function closeModal(){$('#modal').innerHTML=''}
+A.ov=(d,el,e)=>{if(e.target===el)closeModal()};A.close=closeModal;
+let _yes=null;
+function confirmBox(text,yes,label){_yes=yes;openModal(`<h2>Подтвердите действие</h2><div class="muted">${esc(text)}</div><div class="row"><span class="sp"></span><button class="btn" data-a="close">Отмена</button><button class="btn pri" data-a="yes">${label||'Подтвердить'}</button></div>`)}
+A.yes=()=>{closeModal();const f=_yes;_yes=null;f&&f()};
+A.go=d=>go(d.h);
+A.bell=()=>{UI.bell=!UI.bell;render()};
+A.tab=d=>{UI.tab=d.t;render()};
+
+/* ---------- small renderers ---------- */
+const markBadge=m=>m?`<span class="mark m${Math.round(m)}" title="${MARK_NAMES[Math.round(m)]}">${Math.round(m)}</span>`:'';
+const pctChip=p=>`<span class="chip ${p>=85?'green':p>=50?'blue':p>=30?'orange':'red'} num">${r0(p)}%</span>`;
+const lvlChip=n=>`<span class="chip">Уровень ${n} · ${LV(n).name}</span>`;
+const empty=t=>`<div class="empty">${t}</div>`;
+const bar=(p,color)=>`<span class="bar"><i style="width:${Math.max(0,Math.min(100,p))}%;${color?'background:'+color:''}"></i></span>`;
+const kpi=(l,v,s)=>`<div class="card kpi"><div class="l">${l}</div><div class="v num">${v}</div><div class="s">${s||'&nbsp;'}</div></div>`;
+function lineChart(pts){if(pts.length<2)return empty('График появится после двух проведённых тестов.');const W=640,H=200,pl=36,pr=14,pt=14,pb=28,x=i=>pl+(W-pl-pr)*i/(pts.length-1),y=v=>pt+(H-pt-pb)*(1-v/100);
+  const d=pts.map((p,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(p.v).toFixed(1)).join(' ');const last=pts.length-1;
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="График успеваемости">${[0,25,50,75,100].map(v=>`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="rgba(0,0,0,.06)"/><text x="${pl-8}" y="${y(v)+4}" font-size="11" fill="#A1A1A6" text-anchor="end">${v}%</text>`).join('')}
+  <path d="${d} L${x(last)} ${y(0)} L${x(0)} ${y(0)} Z" fill="rgba(48,67,129,.09)"/><path d="${d}" fill="none" stroke="#304381" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  ${pts.map((p,i)=>`<circle cx="${x(i)}" cy="${y(p.v)}" r="${i===last?5:3}" fill="${i===last?'#304381':'#fff'}" stroke="#304381" stroke-width="2"><title>${esc(p.l)}: ${r0(p.v)}%</title></circle>`).join('')}
+  ${[0,Math.floor(last/2),last].filter((v,i,a)=>a.indexOf(v)===i).map(i=>`<text x="${x(i)}" y="${H-8}" font-size="11" fill="#A1A1A6" text-anchor="${i===0?'start':i===last?'end':'middle'}">${esc(pts[i].l)}</text>`).join('')}</svg>`}
+const trend=rs=>[...rs].sort((a,b)=>a.ts-b.ts).slice(-14).map(r=>({l:fdate(r.ts),v:runAvg(r)}));
+
+/* ---------- shell ---------- */
+const NAV=[['home','Главная','home'],['classes','Классы','grid'],['tests','Тесты','test'],['stats','Статистика','chart'],['books','Учебники','book'],['materials','Материалы','book'],['prefs','Настройки','gear']];
+function render(){const app=$('#app');if(!ready){app.innerHTML='<div class="center muted">Загрузка данных…</div>';return}
+  const r=route();
+  if(isTeacher&&!me&&r!=='join'&&!r.startsWith('s-')){app.innerHTML=loginView();return}
+  if(me&&me.role==='admin'&&r!=='join'){app.innerHTML=adminView(r);return}
+  if(!isTeacher||r==='join'||(r.startsWith('s-')&&(!isTeacher||!me))){app.innerHTML=joinView();return}
+  let sec='home',body;
+  if(r==='home')body=homeView();
+  else if(r==='classes'){sec='classes';body=classesView()}
+  else if(r.startsWith('grade-')){sec='classes';body=gradeView(r.slice(6))}
+  else if(r.startsWith('class-')){sec='classes';body=classView(r.slice(6))}
+  else if(r==='tests'){sec='tests';body=testsView()}
+  else if(r==='builder'){sec='tests';body=builderView()}
+  else if(r==='launch'){sec='tests';body=launchView()}
+  else if(r==='run'){sec='tests';body=runView()}
+  else if(r==='result'){sec='tests';body=resultView()}
+  else if(r.startsWith('s-')){sec='tests';body=monitorView(r.slice(2).toUpperCase())}
+  else if(r==='stats'){sec='stats';body=statsView()}
+  else if(r==='materials'){sec='materials';body=materialsView()}
+  else if(r==='books'||r.startsWith('books-')){sec='books';body=booksView(r)}
+  else if(r==='prefs'){sec='prefs';body=prefsView()}
+  else body=homeView();
+  const m=meta(),name=m.teacher||'Учитель',li=logItems();
+  app.innerHTML=`<div class="shell"><header class="side"><div class="brand"><img src="logo.png" alt="Эмблема Diplomat International School"><span><b>Diplomat</b><small>Кабинет учителя</small></span><span class="by">By Mirtemirov Ozodbek</span></div>
+   <nav class="navs">${NAV.map(n=>`<button class="nav${sec===n[0]?' on':''}" data-a="go" data-h="${n[0]}">${ic(n[2])}<span>${n[1]}</span></button>`).join('')}</nav>
+   <div class="foot"><button class="btn small" data-a="go" data-h="join" title="Открыть режим ученика">Режим ученика</button><div class="me-card" title="${db?'Данные сохраняются на сервере':'Данные сохраняются в этом браузере'}"><span class="av">${esc((me.first||"?")[0]+(me.last||"")[0]||"")}</span><div class="nm"><b>${esc(me.first+" "+me.last)}</b><small><span class="dot${db?'':' off'}"></span>${db?'Сервер':'Этот браузер'}</small></div></div><button class="btn sq" data-a="lg-out" aria-label="Выйти" title="Выйти"><svg class="ic" viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l4-4-4-4M14 12H4"/></svg></button></div></header>${stale?'<div class="stale">Нет связи с сервером — данные могут быть устаревшими.</div>':''}
+   <div class="main"><div class="top"><span class="cap">${esc(m.name||'Diplomat')} · ${NAV.find(n=>n[0]===sec)[1]}</span><span class="sp"></span>
+   <div style="position:relative"><button class="iconbtn" data-a="bell" aria-label="Уведомления">${ic('bell')}</button>${UI.bell?`<div class="pop"><h3>Уведомления</h3>${li.length?`<ul>${li.slice(0,8).map(x=>`<li>${esc(x.x)}<div class="tiny muted">${fdt(x.t)}</div></li>`).join('')}</ul>`:'<div class="muted small" style="padding:10px 0">Пока нет событий.</div>'}</div>`:''}</div>
+   <button class="who" data-a="go" data-h="prefs" title="Настройки профиля"><span class="ava">${esc(name.trim()[0]||'У')}</span>${esc(name)}</button></div>
+   <div class="page${UI.enter?' enter':''}">${body}</div></div></div>`;
+  UI.enter=false}
+
+/* ---------- home ---------- */
+function homeView(){
+  if(stale&&!S.grades.length)return empty('Нет связи с базой данных. Проверьте интернет — данные появятся автоматически, страницу обновлять не нужно.');
+  if(!S.grades.length&&!S.sections.length)return `<div class="hero" style="max-width:760px;margin:40px auto"><img src="logo.png" alt=""><div style="flex:1;min-width:260px"><div class="sub">INTERNATIONAL SCHOOL</div><h1>Добро пожаловать</h1><div style="color:rgba(255,255,255,.7);margin:10px 0 16px">Платформа для уроков: классы, тесты пяти уровней и статистика. Хранятся только данные классов — без имён и списков учеников.</div>
+   <form class="row" style="flex-wrap:wrap"><input class="in" id="wName" placeholder="Как к вам обращаться" style="width:280px" aria-label="Имя учителя"><button class="btn big" style="background:var(--gold);color:var(--dark)" data-a="welcome" data-submit>Начать работу</button></form></div></div>`;
+  const all=rows(),runs=[...S.runs].sort((a,b)=>b.ts-a.ts),students=S.sections.reduce((s,x)=>s+(x.count||0),0);
+  return `<div class="hero"><img src="logo.png" alt=""><div style="flex:1;min-width:260px"><div class="sub">DIPLOMAT · INTERNATIONAL SCHOOL</div><h1>${meta().teacher?'Здравствуйте, '+esc(meta().teacher):'Главная'}</h1><div class="slogan">Study hard. Shine.</div></div><button class="btn big" style="background:#fff;color:var(--dark)" data-a="go" data-h="tests">${ic('play')}Провести тест</button></div>
+  <div class="grid g4">${kpi('Всего классов',S.sections.length,plural(S.grades.length,'параллель','параллели','параллелей'))}${kpi('Всего учеников',students||'—',students?'по данным классов':'укажите число учеников в классах')}${kpi('Проведено тестов',S.runs.length,all.length?plural(all.length,'попытка','попытки','попыток'):'')}${kpi('Средняя успеваемость',all.length?r0(avg(all.map(r=>r.pct)))+'%':'—',all.length?'средняя оценка '+r1(avg(all.map(r=>r.mark))):'нет результатов')}</div>
+  <div class="grid g21"><div class="card"><div class="row" style="margin-bottom:12px"><h2>График успеваемости</h2><span class="sp"></span><span class="tiny muted">средний результат по проведённым тестам</span></div>${lineChart(trend(S.runs))}</div>
+   <div class="card"><h2 style="margin-bottom:8px">Классы</h2><div class="list">${sortedGrades().map(g=>`<div class="row" style="cursor:pointer" data-a="go" data-h="grade-${g.id}"><span class="cap">${g.num||''}</span><b>${esc(g.name)}</b><span class="sp"></span><span class="muted small">${plural(secsOf(g.id).length,'подразделение','подразделения','подразделений')}</span></div>`).join('')}</div></div></div>
+  <div class="grid g2"><div class="card"><h2 style="margin-bottom:8px">Последние проведённые тесты</h2>${runs.length?`<div class="list">${runs.slice(0,5).map(r=>`<div class="row"><div style="min-width:0"><div style="font-weight:500">${esc(r.title)}</div><div class="tiny muted">${esc((secById(r.sectionId)||{}).name||'Класс удалён')} · ${fdate(r.ts)} · ${plural((r.rows||[]).length,'попытка','попытки','попыток')}</div></div><span class="sp"></span>${pctChip(runAvg(r))}</div>`).join('')}</div>`:empty('Тесты ещё не проводились. Откройте класс и запустите первый тест.')}</div>
+   <div class="card"><h2 style="margin-bottom:8px">Последние результаты классов</h2>${runs.length?`<div class="list">${runs.slice(0,6).map(r=>{const p=runAvg(r);return `<div class="row" style="cursor:pointer" data-a="go" data-h="class-${r.sectionId}"><div><div style="font-weight:600">${esc((secById(r.sectionId)||{}).name||'Класс удалён')}</div><div class="tiny muted">уровень ${r.level} · ${LV(r.level).name} · ${fdate(r.ts)}</div></div><span class="sp"></span>${pctChip(p)}${markBadge(markOf(p))}</div>`}).join('')}</div>`:empty('Здесь появятся результаты классов.')}</div></div>`}
+A.welcome=()=>{const n=($('#wName')||{}).value||'';ensureGrades();setMeta({teacher:n.trim(),init:true});log('Созданы классы с 5-го по 9-й');toast('Готово: созданы классы с 5-го по 9-й');render()};
+
+/* ---------- classes ---------- */
+function classesView(){const gs=sortedGrades();
+  return `<div class="head"><div><h1>Классы</h1><div class="muted">Выберите параллель, чтобы открыть её подразделения</div></div><span class="sp"></span><button class="btn pri" data-a="grade-form">${ic('plus')}Добавить класс</button></div>
+  ${gs.length?`<div class="grid g5">${gs.map(g=>{const ss=secsOf(g.id),rs=rows({gradeId:g.id});return `<div class="card hover gradeTile" data-a="go" data-h="grade-${g.id}"><div class="row"><span class="n">${g.num||esc(g.name[0])}</span><span class="sp"></span><button class="btn sq" data-a="grade-form" data-id="${g.id}" aria-label="Переименовать">${ic('edit')}</button><button class="btn sq danger" data-a="grade-del" data-id="${g.id}" aria-label="Удалить">${ic('trash')}</button></div>
+   <h2 style="margin-top:10px">${esc(g.name)}</h2><div class="muted small">${plural(ss.length,'подразделение','подразделения','подразделений')} · ${plural(ss.reduce((s,x)=>s+(x.count||0),0),'ученик','ученика','учеников')}</div><div class="small" style="margin-top:10px">${rs.length?'Средний результат <b class="num">'+r0(avg(rs.map(r=>r.pct)))+'%</b>':'<span class="muted">Результатов пока нет</span>'}</div></div>`}).join('')}</div>`:empty('Классов пока нет. Нажмите «Добавить класс».')}`}
+A['grade-form']=(d,el,e)=>{e.stopPropagation();const g=gradeById(d.id);openModal(`<h2>${g?'Переименовать класс':'Новый класс'}</h2><form><label class="field">Название<input class="in" id="fName" value="${esc(g?g.name:'')}" placeholder="Например, 10 класс"></label></form><div class="row"><span class="sp"></span><button class="btn" data-a="close">Отмена</button><button class="btn pri" data-a="grade-save" data-id="${d.id||''}" data-submit>Сохранить</button></div>`)};
+A['grade-save']=d=>{const name=$('#fName').value.trim();if(!name)return toast('Введите название класса',true);const g=gradeById(d.id);put('grades',g?g.id:'g'+uid(),{...(g||{}),name,num:parseInt(name)||(g&&g.num)||0});log(g?`Класс переименован: ${name}`:`Добавлен класс: ${name}`);closeModal();toast('Сохранено')};
+A['grade-del']=(d,el,e)=>{e.stopPropagation();const g=gradeById(d.id),ss=secsOf(g.id);confirmBox(`Удалить «${g.name}»${ss.length?` вместе с подразделениями (${ss.length}) и их результатами`:''}? Это действие нельзя отменить.`,()=>{ss.forEach(s=>removeSection(s.id));del('grades',g.id);log(`Удалён класс: ${g.name}`);toast('Класс удалён')},'Удалить')};
+function removeSection(id){S.runs.filter(r=>r.sectionId===id).forEach(r=>del('runs',r.id,true));del('sections',id,true)}
+function gradeView(id){const g=gradeById(id);if(!g)return empty('Класс не найден. <button class="btn ghost" data-a="go" data-h="classes">К списку классов</button>');const ss=secsOf(id);
+  return `<div class="head"><div><button class="crumb" data-a="go" data-h="classes">${ic('back')}Классы</button><h1>${esc(g.name)}</h1><div class="muted">${plural(ss.length,'подразделение','подразделения','подразделений')}</div></div><span class="sp"></span><button class="btn pri" data-a="sec-form" data-g="${id}">${ic('plus')}Добавить подразделение</button></div>
+  ${ss.length?`<div class="grid g3">${ss.map(s=>{const st=secStats(s);return `<div class="card hover" data-a="go" data-h="class-${s.id}"><div class="row"><h2>${esc(s.name)}</h2><span class="sp"></span><button class="btn sq" data-a="sec-form" data-id="${s.id}" data-g="${id}" aria-label="Изменить">${ic('edit')}</button><button class="btn sq danger" data-a="sec-del" data-id="${s.id}" aria-label="Удалить">${ic('trash')}</button></div>
+    <div class="muted small" style="margin:6px 0 14px">${plural(st.n,'ученик','ученика','учеников')} · ${plural(st.tests,'тест','теста','тестов')}</div><div class="row">${bar(st.pct)}<b class="num">${st.has?r0(st.pct)+'%':'—'}</b></div></div>`}).join('')}</div>`:empty('В этой параллели пока нет подразделений. Добавьте первое, например «'+(g.num||'')+' «А»».')}`}
+A['sec-form']=(d,el,e)=>{e.stopPropagation();const s=secById(d.id),g=gradeById(d.g);const used=secsOf(g.id).map(x=>x.name);const next=[...'АБВГДЕЖЗИК'].map(c=>`${g.num||g.name} «${c}»`).find(n=>!used.includes(n))||'';
+  openModal(`<h2>${s?'Переименовать подразделение':'Новое подразделение'}</h2><form style="display:flex;flex-direction:column;gap:12px"><label class="field">Название<input class="in" id="fName" value="${esc(s?s.name:next)}"></label><label class="field">Количество учеников (необязательно)<input class="in" id="fCount" type="number" min="0" max="60" value="${s&&s.count?s.count:''}"></label></form><div class="row"><span class="sp"></span><button class="btn" data-a="close">Отмена</button><button class="btn pri" data-a="sec-save" data-id="${d.id||''}" data-g="${d.g}" data-submit>Сохранить</button></div>`)};
+A['sec-save']=d=>{const name=$('#fName').value.trim();if(!name)return toast('Введите название',true);const s=secById(d.id);put('sections',s?s.id:'c'+uid(),{...(s||{}),gradeId:d.g,name,count:Math.max(0,Math.min(60,Math.round(+$('#fCount').value||0)))});log(s?`Подразделение изменено: ${name}`:`Добавлено подразделение: ${name}`);closeModal();toast('Сохранено')};
+A['sec-del']=(d,el,e)=>{e.stopPropagation();const s=secById(d.id);confirmBox(`Удалить ${s.name} вместе с результатами тестов?`,()=>{removeSection(s.id);log(`Удалено подразделение: ${s.name}`);toast('Подразделение удалено');if(route()==='class-'+s.id)go('grade-'+s.gradeId);else render()},'Удалить')};
+
+/* ---------- class page ---------- */
+function classView(id){const s=secById(id);if(!s)return empty('Класс не найден. <button class="btn ghost" data-a="go" data-h="classes">К списку классов</button>');const g=gradeById(s.gradeId)||{},st=secStats(s),tab=UI.tab==='tests'?'tests':'overview';
+  const tabs=[['overview','Обзор'],['tests','Опросы и тесты']];
+  return `<div class="head"><div><button class="crumb" data-a="go" data-h="grade-${s.gradeId}">${ic('back')}${esc(g.name||'Классы')}</button><div class="row"><h1>${esc(s.name)}</h1><span class="cap">${esc(subjectFor(g.num))}</span><button class="btn sq" data-a="sec-form" data-id="${s.id}" data-g="${s.gradeId}" aria-label="Изменить класс">${ic('edit')}</button></div></div><span class="sp"></span><div class="seg" role="tablist">${tabs.map(t=>`<button role="tab" class="${tab===t[0]?'on':''}" data-a="tab" data-t="${t[0]}">${t[1]}</button>`).join('')}</div></div>
+  <div class="grid g4">${kpi('Учеников',st.n||'—',st.n?'':'можно указать в данных класса')}${kpi('Средняя успеваемость',st.has?r1(st.mark):'—',st.has?'средняя оценка по 5-балльной шкале':'нет результатов')}${kpi('Проведено тестов',st.tests)}${kpi('Правильных ответов',st.has?r0(st.pct)+'%':'—','в среднем по классу')}</div>
+  ${tab==='tests'?testsTab(s,g):overviewTab(s,st)}`}
+function overviewTab(s,st){const rs=rows({sectionId:s.id}),runs=runsOf({sectionId:s.id});
+  const dist=[5,4,3,2,1].map(m=>({m,n:rs.filter(r=>r.mark===m).length})),byLvl=LEVELS.map(l=>({l,rs:rs.filter(r=>r.run.level===l.n)}));
+  return `<div class="grid g21"><div class="card"><h2 style="margin-bottom:12px">Изменение успеваемости</h2>${lineChart(trend(runs))}</div>
+  <div class="card"><h2 style="margin-bottom:10px">Общая успеваемость</h2>${rs.length?`<div class="row" style="margin-bottom:12px"><span style="font-size:44px;font-weight:800" class="num">${r1(st.mark)}</span><div class="muted small">средняя оценка<br>${r0(st.pct)}% правильных ответов</div></div>${dist.map(d=>`<div class="row small" style="margin:7px 0">${markBadge(d.m)}${bar(rs.length?d.n/rs.length*100:0,d.m===5?'var(--green)':d.m===4?'var(--blue)':d.m===3?'var(--orange)':'var(--red)')}<span class="num muted" style="width:26px;text-align:right">${d.n}</span></div>`).join('')}`:empty('Оценки появятся после первого теста.')}</div></div>
+  <div class="grid g2"><div class="card"><h2 style="margin-bottom:8px">Результаты по уровням</h2>${rs.length?byLvl.map(x=>`<div class="row small" style="margin:11px 0"><span style="width:130px">${x.l.n} · ${x.l.name}</span>${bar(avg(x.rs.map(r=>r.pct)))}<span class="num" style="width:40px;text-align:right">${x.rs.length?r0(avg(x.rs.map(r=>r.pct)))+'%':'—'}</span></div>`).join(''):empty('Пока нет результатов.')}</div>
+  <div class="card"><h2 style="margin-bottom:8px">Последние результаты</h2>${runs.length?`<div class="list">${runs.slice(0,6).map(r=>{const p=runAvg(r);return `<div class="row"><div><div style="font-weight:500">${esc(r.title)}</div><div class="tiny muted">${fdate(r.ts)} · ${plural((r.rows||[]).length,'попытка','попытки','попыток')}</div></div><span class="sp"></span>${pctChip(p)}${markBadge(markOf(p))}</div>`}).join('')}</div>`:empty('Пока нет результатов.')}</div></div>`}
+function levelCards(tests,sid){return `<div class="grid g5">${LEVELS.map(l=>{const t=tests.find(x=>x.level===l.n&&x.builtin)||tests.find(x=>x.level===l.n);
+  return `<div class="card lvl" style="display:flex;flex-direction:column;gap:10px"><div class="row"><span class="cap">Level ${l.n}</span><span class="sp"></span><span class="dots" aria-label="Сложность ${l.n} из 5">${LEVELS.map(z=>`<i class="${z.n<=l.n?'on':''}"></i>`).join('')}</span></div><h2>${l.name}</h2><div class="muted small" style="flex:1">${l.desc}</div>
+   <div class="small"><div class="row"><span class="muted">Вопросов</span><span class="sp"></span><b class="num">${t?t.questions.length:0}</b></div><div class="row"><span class="muted">Время</span><span class="sp"></span><b class="num">${t?t.minutes+' мин':'—'}</b></div></div>
+   ${t?`<button class="btn pri" data-a="launch" data-t="${t.id}" data-s="${sid||''}">${ic('play')}Выбрать</button>`:`<button class="btn" data-a="new-test" data-l="${l.n}" data-s="${sid||''}">Создать тест</button>`}</div>`}).join('')}</div>`}
+function testsTab(s,g){const ts=allTests().filter(t=>t.gradeNum===g.num&&t.status==='ready'),own=ts.filter(t=>!t.builtin),runs=runsOf({sectionId:s.id}),live=S.sessions.filter(x=>x.sectionId===s.id&&x.status!=='finished');
+  return `<div class="row"><h2>${esc(subjectFor(g.num))} · выберите уровень сложности</h2></div>${levelCards(ts,s.id)}
+  ${live.length?`<div class="card"><h2 style="margin-bottom:8px">Идут групповые тесты</h2><div class="list">${live.map(x=>`<div class="row"><b class="num">${x.id}</b><span>${esc(x.title)}</span><span class="sp"></span><button class="btn pri" data-a="go" data-h="s-${x.id}">Открыть</button></div>`).join('')}</div></div>`:''}
+  ${own.length?`<div class="card"><h2 style="margin-bottom:8px">Мои тесты для этой параллели</h2><div class="list">${own.map(t=>`<div class="row"><div><b>${esc(t.title)}</b><div class="tiny muted">${esc(t.topic||'')} · ${plural(t.questions.length,'вопрос','вопроса','вопросов')}</div></div><span class="sp"></span>${lvlChip(t.level)}<button class="btn pri" data-a="launch" data-t="${t.id}" data-s="${s.id}">${ic('play')}Выбрать</button></div>`).join('')}</div></div>`:''}
+  <div class="card"><h2 style="margin-bottom:8px">Проведённые тесты</h2>${runs.length?`<div class="list">${runs.map(r=>`<div class="row"><div><b>${esc(r.title)}</b><div class="tiny muted">${fdt(r.ts)} · ${r.mode==='group'?'групповой':'на экране учителя'} · ${plural((r.rows||[]).length,'попытка','попытки','попыток')}</div></div><span class="sp"></span>${pctChip(runAvg(r))}<button class="btn" data-a="run-open" data-id="${r.id}">Результаты</button><button class="btn sq danger" data-a="run-del" data-id="${r.id}" aria-label="Удалить">${ic('trash')}</button></div>`).join('')}</div>`:empty('В этом классе тесты ещё не проводились.')}</div>`}
+A['run-open']=d=>{const r=S.runs.find(x=>x.id===d.id);openModal(`<div class="row"><div><h2>${esc(r.title)}</h2><div class="muted small">${fdt(r.ts)} · ${LV(r.level).name}</div></div><span class="sp"></span><button class="btn sq" data-a="close" aria-label="Закрыть">${ic('x')}</button></div>${resultsTable(r)}`,true)};
+function resultsTable(r){const rs=(r.rows||[]).map((w,i)=>{const p=w.total?w.correct/w.total*100:0;return{...w,label:(r.mode==='group'?'Участник ':'Попытка ')+(i+1),p}});
+  return rs.length?`<div class="scroll"><table class="tbl"><thead><tr><th>Попытка</th><th>Верно</th><th>%</th><th>Оценка</th></tr></thead><tbody>${rs.map(w=>`<tr><td><b>${w.label}</b></td><td class="num">${w.correct}/${w.total}</td><td>${pctChip(w.p)}</td><td>${markBadge(markOf(w.p))}</td></tr>`).join('')}</tbody></table></div>`:empty('Результатов пока нет.')}
+A['run-del']=d=>{const r=S.runs.find(x=>x.id===d.id);confirmBox(`Удалить результаты теста «${r.title}» от ${fdate(r.ts)}?`,()=>{del('runs',r.id);log(`Удалены результаты теста: ${r.title}`);toast('Результаты удалены')},'Удалить')};
+
+/* ---------- tests library & builder ---------- */
+function testsView(){const gs=sortedGrades(),ts=allTests().filter(t=>!UI.testsGrade||t.gradeNum===UI.testsGrade).sort((a,b)=>a.gradeNum-b.gradeNum||a.level-b.level);
+  return `<div class="head"><div><h1>Опросы и тесты</h1><div class="muted">Готовые наборы по программе и ваши собственные тесты</div></div><span class="sp"></span><button class="btn" data-a="go" data-h="materials">Создать по PDF</button><button class="btn pri" data-a="new-test">${ic('plus')}Создать тест</button></div>
+  <div class="seg"><button class="${!UI.testsGrade?'on':''}" data-a="tg" data-n="0">Все</button>${gs.map(g=>`<button class="${UI.testsGrade===g.num?'on':''}" data-a="tg" data-n="${g.num}">${esc(g.name)}</button>`).join('')}</div>
+  <div class="card">${ts.length?`<div class="list">${ts.map(t=>`<div class="row" style="flex-wrap:wrap"><div style="min-width:240px;flex:1"><b>${esc(t.title)}</b> ${t.status==='draft'?'<span class="chip orange">черновик</span>':''}${t.builtin?`<span class="chip">${t.changed?'встроенный, изменён':'встроенный'}</span>`:'<span class="chip blue">мой тест</span>'}<div class="tiny muted">${esc(t.subject)} · ${t.gradeNum} класс · ${plural(t.questions.length,'вопрос','вопроса','вопросов')} · ${t.minutes} мин</div></div>${lvlChip(t.level)}
+   <button class="btn pri" ${t.status==='draft'||!t.questions.length?'disabled title="Сначала опубликуйте тест"':''} data-a="launch" data-t="${t.id}">${ic('play')}Запустить</button><button class="btn sq" data-a="edit-test" data-id="${t.id}" aria-label="Редактировать">${ic('edit')}</button><button class="btn sq" data-a="copy-test" data-id="${t.id}" aria-label="Копировать">${ic('copy')}</button><button class="btn sq danger" data-a="del-test" data-id="${t.id}" aria-label="Удалить">${ic('trash')}</button></div>`).join('')}</div>`:empty('Тестов для этой параллели пока нет. Создайте собственный тест или сгенерируйте вопросы по PDF учебника.')}</div>
+  <div class="tiny muted">Встроенные вопросы составлены по темам программы соответствующего класса. Сверьте их с вашим учебником: любой вопрос можно изменить или заменить.</div>`}
+A.tg=d=>{UI.testsGrade=+d.n;render()};
+const blankQ=()=>({q:'',o:['','','',''],c:0});
+A['new-test']=d=>{const g=d.s?gradeById(secById(d.s).gradeId):null;const num=g?g.num:(UI.testsGrade||(sortedGrades()[0]||{}).num||5);M.B={id:'t'+uid(),isNew:true,title:'',subject:(mySubj().includes(subjectFor(num))?subjectFor(num):mySubj()[0]),topic:'',gradeNum:num,level:+d.l||3,minutes:20,status:'draft',questions:[blankQ()]};go('builder')};
+A['edit-test']=d=>{const t=getTest(d.id);M.B=JSON.parse(JSON.stringify(t));go('builder')};
+A['copy-test']=d=>{const t=getTest(d.id);const c=JSON.parse(JSON.stringify(t));delete c.builtin;delete c.changed;c.id='t'+uid();c.title=t.title+' (копия)';c.status='draft';put('tests',c.id,c);log(`Скопирован тест: ${t.title}`);toast('Копия сохранена как черновик')};
+A['del-test']=d=>{const t=getTest(d.id);confirmBox(`Удалить тест «${t.title}»? Уже сохранённые результаты останутся.`,()=>{if(t.builtin)put('tests',t.id,{deleted:true});else del('tests',t.id);log(`Удалён тест: ${t.title}`);toast('Тест удалён')},'Удалить')};
+function builderView(){const b=M.B;if(!b)return empty('Тест не выбран. <button class="btn ghost" data-a="go" data-h="tests">К списку тестов</button>');
+  return `<div class="head"><div><button class="crumb" data-a="go" data-h="tests">${ic('back')}Опросы и тесты</button><h1>${b.isNew?'Новый тест':'Редактирование теста'}</h1></div><span class="sp"></span><button class="btn" data-a="b-save" data-st="draft">Сохранить как черновик</button><button class="btn pri" data-a="b-save" data-st="ready">Сохранить и опубликовать</button></div>
+  <div class="card grid g3"><label class="field" style="grid-column:span 2">Название теста<input class="in" id="bTitle" data-set="B.title" value="${esc(b.title)}" placeholder="Например, Атмосфера и погода"></label><label class="field">Предмет<select class="in" id="bSubj" data-set="B.subject">${[...new Set([b.subject,...mySubj()].filter(Boolean))].map(n=>`<option ${n===b.subject?'selected':''}>${esc(n)}</option>`).join('')}</select></label>
+   <label class="field">Класс<select class="in" id="bGrade" data-set="B.gradeNum" data-num>${sortedGrades().map(g=>`<option value="${g.num}" ${g.num===b.gradeNum?'selected':''}>${esc(g.name)}</option>`).join('')}</select></label>
+   <label class="field">Уровень сложности<select class="in" id="bLevel" data-set="B.level" data-num>${LEVELS.map(l=>`<option value="${l.n}" ${l.n===b.level?'selected':''}>${l.n} · ${l.name}</option>`).join('')}</select></label>
+   <label class="field">Время, минут<input class="in" id="bMin" type="number" min="1" max="180" data-set="B.minutes" data-num value="${b.minutes}"></label>
+   <label class="field" style="grid-column:1/-1">Тема<input class="in" id="bTopic" data-set="B.topic" list="dlTopic" value="${esc(b.topic)}" placeholder="Начните вводить — темы из учебника ${b.gradeNum} класса"></label>${dlTopics(b.gradeNum,b.subject)}</div>
+  ${b.questions.map((q,i)=>`<div class="card" style="display:flex;flex-direction:column;gap:12px"><div class="row"><h3>Вопрос ${i+1}</h3><span class="sp"></span><button class="btn sq danger" data-a="b-qdel" data-i="${i}" aria-label="Удалить вопрос">${ic('trash')}</button></div>
+   <textarea class="in" id="bq${i}" data-set="B.questions.${i}.q" placeholder="Текст вопроса" aria-label="Текст вопроса ${i+1}">${esc(q.q)}</textarea>
+   ${q.o.map((o,k)=>`<div class="row"><label class="row" title="Отметить как правильный ответ" style="cursor:pointer"><input type="radio" id="bq${i}c${k}" name="c${i}" value="${k}" data-set="B.questions.${i}.c" data-num ${q.c===k?'checked':''}><b>${'ABCDEF'[k]}</b></label><input class="in" id="bq${i}o${k}" data-set="B.questions.${i}.o.${k}" value="${esc(o)}" placeholder="Вариант ответа" aria-label="Вариант ${'ABCDEF'[k]}">${q.o.length>2?`<button class="btn sq" data-a="b-odel" data-i="${i}" data-k="${k}" aria-label="Удалить вариант">${ic('x')}</button>`:''}</div>`).join('')}
+   <div class="row"><span class="tiny muted">Правильный ответ отмечен кружком слева.</span><span class="sp"></span>${q.o.length<6?`<button class="btn ghost" data-a="b-oadd" data-i="${i}">${ic('plus')}Добавить вариант</button>`:''}</div></div>`).join('')}
+  <div class="row"><button class="btn" data-a="b-qadd">${ic('plus')}Добавить вопрос</button><span class="muted small">Всего вопросов: ${b.questions.length}</span></div>`}
+A['b-qadd']=()=>{M.B.questions.push(blankQ());render();window.scrollTo(0,document.body.scrollHeight)};
+A['b-qdel']=d=>{M.B.questions.splice(+d.i,1);render()};
+A['b-oadd']=d=>{M.B.questions[+d.i].o.push('');render()};
+A['b-odel']=d=>{const q=M.B.questions[+d.i];q.o.splice(+d.k,1);if(q.c>=q.o.length)q.c=0;else if(q.c>+d.k)q.c--;render()};
+A['b-save']=d=>{const b=M.B;b.title=(b.title||'').trim();if(!b.title)return toast('Введите название теста',true);
+  if(d.st==='ready'){if(!b.questions.length)return toast('Добавьте хотя бы один вопрос',true);for(let i=0;i<b.questions.length;i++){const q=b.questions[i];if(!q.q.trim())return toast(`Вопрос ${i+1}: введите текст вопроса`,true);if(q.o.some(o=>!String(o).trim()))return toast(`Вопрос ${i+1}: заполните все варианты ответа`,true);if(new Set(q.o.map(o=>String(o).trim().toLowerCase())).size<q.o.length)return toast(`Вопрос ${i+1}: варианты ответа повторяются`,true)}}
+  const o={...b,status:d.st,minutes:Math.max(1,+b.minutes||20)};delete o.isNew;delete o.builtin;delete o.changed;put('tests',b.id,o);log(`${d.st==='draft'?'Сохранён черновик':'Опубликован тест'}: ${b.title}`);toast(d.st==='draft'?'Черновик сохранён':'Тест опубликован');M.B=null;go('tests')};
+
+/* ---------- launch, quiz, result ---------- */
+A.launch=d=>{L={testId:d.t,sectionId:d.s||''};go('launch')};
+function launchView(){const t=L&&getTest(L.testId);if(!t)return empty('Тест не выбран. <button class="btn ghost" data-a="go" data-h="tests">К списку тестов</button>');
+  const secs=S.sections.filter(s=>(gradeById(s.gradeId)||{}).num===t.gradeNum),pool=secs.length?secs:S.sections,sec=secById(L.sectionId),lv=LV(t.level),live=!!(db&&room);
+  return `<div class="head"><div><button class="crumb" data-a="go" data-h="${sec?'class-'+sec.id:'tests'}">${ic('back')}${sec?esc(sec.name):'Опросы и тесты'}</button><h1>${esc(t.title)}</h1></div></div>
+  <div class="grid g21"><div class="card" style="display:flex;flex-direction:column;gap:14px"><div class="grid g3">${[['Предмет',t.subject],['Класс',sec?sec.name:t.gradeNum+' класс'],['Уровень сложности',`${lv.n} · ${lv.name}`],['Количество вопросов',t.questions.length],['Время прохождения',t.minutes+' минут'],['Тема',t.topic||'Без темы']].map(x=>`<div><div class="tiny muted">${x[0]}</div><b>${esc(x[1])}</b></div>`).join('')}</div>
+   <div><h3 style="margin-bottom:6px">Правила теста</h3><ul class="muted" style="margin:0;padding-left:20px"><li>В каждом вопросе нужно выбрать один вариант ответа.</li><li>Можно возвращаться к предыдущим вопросам и менять ответ до завершения.</li><li>Ответы сохраняются автоматически.</li><li>Когда время выйдет, тест завершится сам.</li><li>Результат: доля правильных ответов и оценка от 1 до 5.</li></ul></div></div>
+  <div class="card" style="display:flex;flex-direction:column;gap:14px"><label class="field">Класс<select class="in" id="lSec">${`<option value="">Выберите класс</option>`+pool.map(s=>`<option value="${s.id}" ${s.id===L.sectionId?'selected':''}>${esc(s.name)}</option>`).join('')}</select></label>
+   <button class="btn pri big" data-a="solo-start">Начать тест</button><div class="tiny muted">Тест идёт на этом экране: класс отвечает вместе или ученики проходят по очереди. Каждая попытка сохраняется без имён.</div>
+   <div style="border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:8px"><button class="btn big" data-a="group-start" ${live?'':'disabled'}>${ic('users')}Запустить групповой тест</button><div class="tiny muted">${live?'Участники подключаются со своих устройств по ссылке или коду, без имён. Вы видите, сколько подключилось, начало и завершило тест.':'Групповой режим работает только в опубликованной версии платформы, когда доступна общая база данных.'}</div></div></div></div>`}
+document.addEventListener('change',e=>{if(e.target.id==='lSec'&&L){L.sectionId=e.target.value;render()}});
+function startSolo(testId,sectionId,runId){const t=getTest(testId),sec=secById(sectionId);if(!t)return go('tests');if(!sec)return toast('Выберите класс',true);
+  const now=Date.now();Q={kind:'solo',testId:t.id,sectionId:sec.id,runId:runId||'r'+uid(),title:t.title,sub:sec.name,questions:t.questions.map(q=>({q:q.q,o:q.o})),ans:t.questions.map(()=>-1),i:0,ts:now,endsAt:now+t.minutes*6e4};ls('kl-run-'+(me?me.tid:'x'),Q);go('run')}
+A['solo-start']=()=>startSolo(L.testId,L.sectionId);
+function quizHTML(){const q=Q.questions[Q.i],n=Q.questions.length,done=Q.ans.filter(a=>a>=0).length;
+  return `<div class="quiz"><div class="row"><div><div class="tiny muted">${esc(Q.sub||'')}</div><b>${esc(Q.title)}</b></div><span class="sp"></span><span class="chip blue num">${ic('clock')}<span id="timer">${timeLeft()}</span></span></div>
+  <div class="row"><span class="num small muted">Отвечено ${done} из ${n}</span><span class="bar"><i style="width:${done/n*100}%;animation:none;transition:width .3s"></i></span></div>
+  <div class="card" style="display:flex;flex-direction:column;gap:14px;padding:30px"><div class="muted small num">Вопрос ${Q.i+1} из ${n}</div><h2 style="font-size:24px;line-height:1.3">${esc(q.q)}</h2>
+   <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">${q.o.map((o,k)=>`<button class="opt${Q.ans[Q.i]===k?' on':''}" data-a="q-pick" data-k="${k}" aria-pressed="${Q.ans[Q.i]===k}"><b>${'ABCDEF'[k]}</b><span>${esc(o)}</span></button>`).join('')}</div></div>
+  <div class="row"><button class="btn" data-a="q-go" data-i="${Q.i-1}" ${Q.i?'':'disabled'}>${ic('back')}Назад</button><span class="sp"></span>${Q.i<n-1?`<button class="btn pri" data-a="q-go" data-i="${Q.i+1}">Следующий вопрос</button>`:''}<button class="btn${Q.i===n-1?' pri':''}" data-a="q-finish">Завершить тест</button></div>
+  <div class="qnav" aria-label="Навигация по вопросам">${Q.questions.map((_,i)=>`<button class="${Q.ans[i]>=0?'a':''}${i===Q.i?' c':''}" data-a="q-go" data-i="${i}" aria-label="Вопрос ${i+1}">${i+1}</button>`).join('')}</div></div>`}
+function timeLeft(){if(!Q||!Q.endsAt)return '';const s=Math.max(0,Math.round((Q.endsAt-Date.now())/1000));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+setInterval(()=>{if(!Q||!Q.endsAt)return;const el=$('#timer');if(el)el.textContent=timeLeft();if(Date.now()>=Q.endsAt){toast('Время вышло — тест завершён');closeModal();finishQuiz()}},1000);
+A['q-pick']=d=>{Q.ans[Q.i]=+d.k;quizChanged();render()};
+A['q-go']=d=>{Q.i=Math.max(0,Math.min(Q.questions.length-1,+d.i));quizChanged(true);render()};
+A['q-finish']=()=>{const left=Q.ans.filter(a=>a<0).length;confirmBox(left?`Без ответа осталось вопросов: ${left}. Завершить тест?`:'Завершить тест и показать результат?',finishQuiz,'Завершить')};
+function quizChanged(navOnly){if(Q.kind==='solo')ls('kl-run-'+(me?me.tid:'x'),Q);else if(J){try{sessionStorage.setItem('kl-j',JSON.stringify({code:J.code,pid:J.pid,name:J.name,ans:Q.ans}))}catch(e){}if(!navOnly&&J.rm)J.rm.presence({ans:Q.ans,n:Q.ans.filter(a=>a>=0).length}).catch(()=>{})}}
+function finishQuiz(){if(!Q)return;if(Q.kind==='solo'){const t=getTest(Q.testId),sec=secById(Q.sectionId);if(!t||!sec){Q=null;ls('kl-run-'+(me?me.tid:'x'),null);toast('Тест или класс были удалены — результат не сохранён',true);return go('tests')}
+    const g=gradeRows(t,Q.ans),pct=g.correct/g.total*100,id=Q.runId||'r'+uid(),old=S.runs.find(r=>r.id===id),rws=[...((old&&old.rows)||[]),{answers:Q.ans,...g}];
+    put('runs',id,{sectionId:sec.id,gradeId:sec.gradeId,testId:t.id,title:t.title,subject:t.subject,topic:t.topic,level:t.level,ts:old?old.ts:Date.now(),mode:'solo',rows:rws},true);log(`${sec.name}: тест «${t.title}» — ${r0(pct)}%`);
+    R={name:`${sec.name} · попытка ${rws.length}`,title:t.title,testId:t.id,runId:id,level:t.level,sectionId:sec.id,...g,pct,review:t.questions.map((q,i)=>({...q,a:Q.ans[i]}))};Q=null;ls('kl-run-'+(me?me.tid:'x'),null);go('result')}
+  else{const a=Q.ans;Q=null;J.st='done';J.ans=a;if(J.rm)J.rm.presence({st:'done',ans:a,n:a.filter(x=>x>=0).length}).catch(()=>{});render()}}
+function runView(){if(!Q||Q.kind!=='solo')return empty('Сейчас нет запущенного теста. <button class="btn ghost" data-a="go" data-h="tests">К списку тестов</button>');return quizHTML()}
+function scoreCard(pct,correct,total,level,name,title){const m=markOf(pct);
+  return `<div class="card row" style="gap:32px;flex-wrap:wrap;padding:32px"><div class="ring"><svg viewBox="0 0 180 180"><circle cx="90" cy="90" r="80" stroke="var(--fill)"/><circle class="fg" cx="90" cy="90" r="80" stroke-dasharray="503" stroke-dashoffset="${503*(1-pct/100)}"/></svg><div class="t num">${r0(pct)}%</div></div>
+  <div style="flex:1;min-width:260px"><div class="muted">${esc(title)}</div><h1 style="margin:4px 0 16px">${esc(name)}</h1><div class="grid g2" style="gap:14px"><div><div class="tiny muted">Правильных ответов</div><b class="num" style="font-size:22px">${correct} из ${total}</b></div><div><div class="tiny muted">Школьная оценка</div><div class="row">${markBadge(m)}<b>${MARK_NAMES[m]}</b></div></div></div></div></div>`}
+function resultView(){if(!R)return empty('Результат не найден. <button class="btn ghost" data-a="go" data-h="tests">К списку тестов</button>');
+  return `<div class="quiz" style="max-width:920px"><div class="head"><h1>Тест завершён</h1><span class="sp"></span><button class="btn" data-a="go" data-h="class-${R.sectionId}">К классу</button><button class="btn pri" data-a="again">Ещё одна попытка</button></div>${scoreCard(R.pct,R.correct,R.total,R.level,R.name,R.title)}
+  <div class="card"><h2 style="margin-bottom:12px">Разбор ответов</h2>${R.review.map((q,i)=>`<div style="padding:12px 0;border-top:1px solid var(--line)"><div class="row"><b>${i+1}. ${esc(q.q)}</b><span class="sp"></span><span class="chip ${q.a===q.c?'green':'red'}">${q.a===q.c?'верно':q.a<0?'нет ответа':'ошибка'}</span></div><div class="small" style="margin-top:6px">${q.a!==q.c&&q.a>=0?`<div style="color:var(--red)">Выбранный ответ: ${esc(q.o[q.a])}</div>`:''}<div style="color:var(--green)">Правильный ответ: ${esc(q.o[q.c])}</div></div></div>`).join('')}</div></div>`}
+A.again=()=>{if(!R)return go('tests');startSolo(R.testId,R.sectionId,R.runId)};
+
+/* ---------- group mode: teacher ---------- */
+const genCode=()=>{const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let c;do{c=Array.from({length:6},()=>a[Math.floor(Math.random()*a.length)]).join('')}while(S.sessions.some(s=>s.id===c));return c};
+A['group-start']=()=>{const t=getTest(L.testId),sec=secById(L.sectionId);if(!sec)return toast('Выберите класс',true);const code=genCode();
+  put('sessions',code,{testId:t.id,title:t.title,subject:t.subject,topic:t.topic,level:t.level,minutes:t.minutes,sectionId:sec.id,sectionName:sec.name,questions:t.questions.map(q=>({q:q.q,o:q.o})),status:'lobby',created:Date.now(),runId:'r'+uid(),scores:{}},true);log(`${sec.name}: создан групповой тест «${t.title}», код ${code}`);go('s-'+code)};
+async function ensureRoom(code){if(G&&G.code===code)return;if(G&&G.rm)G.rm.leave().catch(()=>{});G={code,rm:null,peers:[],err:''};if(!room){G.err='Связь в реальном времени недоступна в этом окне.';return}
+  try{const rm=await room.join('s-'+code.toLowerCase());if(!G||G.code!==code)return;G.rm=rm;rm.onPeers(ch=>{if(!G||G.code!==code)return;G.peers=ch.peers.filter(p=>p.presence&&p.presence.pid);syncGroup();softRender()},e=>{G.err='Соединение с участниками прервано. Обновите страницу.';softRender()})}catch(e){G.err='Не удалось открыть комнату теста. Обновите страницу.';softRender()}}
+const pLabel=pid=>'Участник '+String(pid).slice(-3).toUpperCase();
+function partList(sess){const run=S.runs.find(r=>r.id===sess.runId),saved=Object.fromEntries(((run&&run.rows)||[]).map(w=>[w.pid,w]));const m={};
+  for(const p of (G&&G.peers)||[]){const pr=p.presence;m[pr.pid]={pid:String(pr.pid).slice(0,24),name:pLabel(pr.pid),st:['joined','started','done'].includes(pr.st)?pr.st:'joined',ans:Array.isArray(pr.ans)?pr.ans:[],n:+pr.n||0,online:true}}
+  for(const pid in saved)if(!m[pid])m[pid]={pid,name:pLabel(pid),st:'done',ans:saved[pid].answers,n:saved[pid].answers.filter(a=>a>=0).length,online:false};
+  return Object.values(m).sort((a,b)=>a.name.localeCompare(b.name,'ru'))}
+function syncGroup(force){const sess=S.sessions.find(s=>s.id===G.code);if(!sess||sess.status==='lobby')return;const t=getTest(sess.testId);if(!t)return;const run=S.runs.find(r=>r.id===sess.runId),have=new Set(((run&&run.rows)||[]).map(w=>w.pid));
+  const add=partList(sess).filter(p=>p.online&&!have.has(p.pid)&&(p.st==='done'||(force&&p.st==='started')));if(!add.length)return;
+  const rws=[...((run&&run.rows)||[]),...add.map(p=>{const answers=t.questions.map((_,i)=>Number.isInteger(p.ans[i])?p.ans[i]:-1);return{pid:p.pid,answers,...gradeRows(t,answers)}})];
+  put('runs',sess.runId,{sectionId:sess.sectionId,gradeId:(secById(sess.sectionId)||{}).gradeId||'',testId:t.id,title:t.title,subject:t.subject,topic:t.topic,level:t.level,ts:sess.startedAt||Date.now(),mode:'group',code:sess.id,rows:rws},true);
+  const scores={...(sess.scores||{})};rws.forEach(w=>scores[w.pid]={c:w.correct,t:w.total});put('sessions',sess.id,{...sess,scores},true)}
+function monitorView(code){const sess=S.sessions.find(s=>s.id===code);if(!sess)return empty('Групповой тест с таким кодом не найден. <button class="btn ghost" data-a="go" data-h="tests">К списку тестов</button>');ensureRoom(code);
+  const ps=partList(sess),cnt=st=>ps.filter(p=>p.st===st).length,run=S.runs.find(r=>r.id===sess.runId),link=PLATFORM_URL?PLATFORM_URL+'#s-'+code:'';
+  const stName={joined:['подключился','blue'],started:['проходит тест','orange'],done:['завершил','green']};
+  return `<div class="head"><div><button class="crumb" data-a="go" data-h="class-${sess.sectionId}">${ic('back')}${esc(sess.sectionName)}</button><h1>${esc(sess.title)}</h1><div class="muted">Групповой тест · ${esc(sess.sectionName)} · ${LV(sess.level).name} · ${sess.minutes} мин</div></div><span class="sp"></span>
+   ${sess.status==='lobby'?`<button class="btn pri big" data-a="g-run" data-c="${code}" ${ps.length?'':'disabled'}>${ic('play')}Начать тест</button>`:sess.status==='running'?`<button class="btn pri big" data-a="g-end" data-c="${code}">Завершить тест</button>`:'<span class="chip green">Тест завершён</span>'}<button class="btn danger" data-a="g-del" data-c="${code}">${sess.status==='finished'?'Закрыть сессию':'Отменить'}</button></div>
+  ${G&&G.err?`<div class="card" style="color:var(--red)">${esc(G.err)}</div>`:''}
+  ${sess.status!=='finished'?`<div class="grid g21"><div class="card" style="text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center">${link?`<div class="qr" data-qr="${esc(link)}" aria-label="QR-код для подключения"></div><div class="small muted">Наведите камеру телефона</div>`:""}<div class="muted">Код теста</div><div class="code">${code}</div>${link?`<div class="row" style="max-width:100%"><input class="in small" id="gLink" readonly value="${esc(link)}" style="width:420px;max-width:60vw" aria-label="Ссылка для подключения"><button class="btn" data-a="copy" data-v="${esc(link)}">${ic('copy')}Копировать</button></div>`:''}<div class="small muted">Участники открывают платформу по ссылке и вводят код. Имена не запрашиваются и не сохраняются.</div></div>
+   <div class="card"><div class="grid" style="gap:14px"><div><div class="tiny muted">Подключились</div><b class="num" style="font-size:30px">${ps.length}</b></div><div><div class="tiny muted">Начали тест</div><b class="num" style="font-size:30px">${cnt('started')+cnt('done')}</b></div><div><div class="tiny muted">Завершили</div><b class="num" style="font-size:30px">${cnt('done')}</b></div></div></div></div>
+  <div class="card"><h2 style="margin-bottom:8px">${sess.status==='lobby'?'Экран ожидания':'Ход теста'}</h2>${ps.length?`<div class="list">${ps.map(p=>`<div class="row"><span class="ava">${esc(p.name.slice(-3))}</span><b>${esc(p.name)}</b><span class="sp"></span>${sess.status==='running'?`<span style="width:180px" class="row">${bar(p.n/sess.questions.length*100)}<span class="num small muted">${p.n}/${sess.questions.length}</span></span>`:''}<span class="chip ${stName[p.st][1]}">${stName[p.st][0]}</span></div>`).join('')}</div>`:empty('Пока никто не подключился. Покажите код на экране.')}</div>`
+  :`<div class="card"><h2 style="margin-bottom:8px">Общие результаты</h2>${run?resultsTable(run):empty('Никто не успел ответить — результаты не сохранены.')}</div>`}`}
+A.copy=d=>{navigator.clipboard.writeText(d.v).then(()=>toast('Скопировано'),()=>{const i=$('#gLink')||$('#bkOut');if(i){i.focus();i.select()}toast('Выделите текст и скопируйте вручную')})};
+A['g-run']=d=>{const s=S.sessions.find(x=>x.id===d.c);put('sessions',s.id,{...s,status:'running',startedAt:Date.now()});toast('Тест начался')};
+A['g-end']=d=>confirmBox('Завершить тест для всех? Ответы тех, кто ещё не закончил, будут засчитаны как есть.',()=>{syncGroup(true);const s=S.sessions.find(x=>x.id===d.c);put('sessions',s.id,{...s,status:'finished'});log(`${s.sectionName}: групповой тест «${s.title}» завершён`);toast('Тест завершён, рейтинг обновлён')},'Завершить');
+A['g-del']=d=>{const s=S.sessions.find(x=>x.id===d.c),fin=s.status==='finished';const f=()=>{if(G&&G.rm)G.rm.leave().catch(()=>{});G=null;del('sessions',s.id,true);go('class-'+s.sectionId)};fin?f():confirmBox('Отменить групповой тест? Участники будут отключены, уже сохранённые результаты останутся.',f,'Отменить тест')};
+
+/* ---------- group mode: student ---------- */
+function joinView(){const wrap=h=>`<div class="center"><div style="width:min(860px,100%);display:flex;flex-direction:column;gap:18px">${h}${isTeacher?`<button class="btn ghost" data-a="leave-join">${ic('back')}Вернуться в режим учителя</button>`:''}</div></div>`;
+  if(!db)return wrap(`<div class="card"><h1>Режим ученика</h1><p class="muted">Подключение к групповому тесту работает только в опубликованной версии платформы.</p></div>`);
+  if(!J||J.st==='form'){const r=route(),pre=r.startsWith('s-')?r.slice(2).toUpperCase():(J&&J.code)||'';
+    return wrap(`<div class="hero" style="max-width:520px;margin:0 auto;width:100%;flex-direction:column;align-items:stretch;text-align:center"><img src="logo.png" alt="" style="margin:0 auto"><div><div class="sub">DIPLOMAT · INTERNATIONAL SCHOOL</div><h1>Подключение к тесту</h1><div style="color:rgba(255,255,255,.7);margin-top:8px">Введите код, который показал учитель. Имя вводить не нужно.</div></div><form style="display:flex;flex-direction:column;gap:14px"><input class="in" id="jCode" value="${esc(pre)}" maxlength="6" aria-label="Код теста" placeholder="КОД" style="text-transform:uppercase;letter-spacing:.3em;font-size:26px;font-weight:700;text-align:center" autocomplete="off"><button class="btn big" style="background:var(--gold);color:var(--dark)" data-a="j-find" data-submit>Подключиться</button></form>${J&&J.err?`<div style="color:#FF9A9A">${esc(J.err)}</div>`:''}</div>`)}
+  const s=J.sess;
+  if(!s||s.gone)return wrap(`<div class="card"><h1>Тест закрыт</h1><p class="muted">Учитель закрыл этот тест.</p><button class="btn" data-a="j-reset">Ввести другой код</button></div>`);
+  if(J.st==='joined')return wrap(`<div class="card" style="text-align:center;padding:48px"><div class="muted">${esc(s.sectionName)} · ${esc(s.title)}</div><h1 style="margin:10px 0">Вы подключены</h1><span class="cap gold">${esc(J.name)}</span><p class="muted">Ожидайте — тест начнётся, когда учитель нажмёт «Начать тест».</p><div class="small muted">Вопросов: ${s.questions.length} · время: ${s.minutes} мин</div></div>`);
+  if(J.st==='started'&&Q)return `<div style="padding:28px 20px">${quizHTML()}</div>`;
+  const sc=(s.scores||{})[J.pid];
+  return wrap(sc?`<h1>Тест завершён</h1>${scoreCard(sc.t?sc.c/sc.t*100:0,sc.c,sc.t,s.level,J.name,s.title)}`:`<div class="card" style="text-align:center;padding:48px"><h1>Ответы отправлены</h1><p class="muted">Результат появится здесь через несколько секунд.</p></div>`)}
+A['leave-join']=()=>{jReset();go('home')};
+function jReset(){if(J){J.unsub&&J.unsub();J.rm&&J.rm.leave().catch(()=>{})}J=null;Q=null;try{sessionStorage.removeItem('kl-j')}catch(e){}}
+A['j-reset']=()=>{jReset();render()};
+A['j-find']=async()=>{const code=$('#jCode').value.trim().toUpperCase();if(!/^[A-Z0-9]{6}$/.test(code)){J={st:'form',code,err:'Код состоит из 6 букв и цифр.'};return render()}
+  J={st:'form',code,pid:'p'+uid(),err:''};try{const snap=await db.doc('sessions/'+code).get();if(!snap.exists){J.err='Тест с таким кодом не найден. Проверьте код.';return render()}const d=snap.data();if(d.status==='finished'){J.err='Этот тест уже завершён.';return render()}J.sess=d;J.name=pLabel(J.pid);J.st='joined';J.ans=[];await jConnect();render()}catch(e){J.st='form';J.err='Не удалось связаться с базой. Попробуйте ещё раз.';render()}};
+async function jConnect(){const code=J.code;J.unsub=db.doc('sessions/'+code).onSnapshot(snap=>{if(!J||J.code!==code)return;J.sess=snap.exists?snap.data():{gone:true};jTick();render()},()=>{});
+  if(room){try{J.rm=await room.join('s-'+code.toLowerCase());await J.rm.presence({pid:J.pid,st:J.st,ans:J.ans||[],n:(J.ans||[]).filter(a=>a>=0).length})}catch(e){J.err='Нет связи с учителем. Обновите страницу.'}}jTick()}
+function jTick(){const s=J.sess;if(!s||s.gone)return;if(s.status==='running'&&J.st==='joined'){J.st='started';Q={kind:'group',title:s.title,sub:`${s.sectionName} · ${J.name}`,questions:s.questions,ans:s.questions.map((_,i)=>Number.isInteger((J.ans||[])[i])?J.ans[i]:-1),i:0,endsAt:s.startedAt+s.minutes*6e4};J.rm&&J.rm.presence({st:'started'}).catch(()=>{})}
+  if(s.status==='finished'&&J.st==='started'){Q=null;J.st='done'}}
+
+/* ---------- statistics ---------- */
+function statsView(){const F=M.F,f={sectionId:F.section||undefined,subject:F.subject||undefined,topic:F.topic||undefined,level:F.level||undefined,from:F.from?new Date(F.from).getTime():undefined,to:F.to?new Date(F.to).getTime()+864e5:undefined};
+  const rs=rows(f),runIds=new Set(rs.map(r=>r.run.id)),runs=S.runs.filter(r=>runIds.has(r.id)),uniq=k=>[...new Set(S.runs.map(r=>r[k]).filter(Boolean))];
+  const sel=(id,key,label,opts)=>`<label class="field">${label}<select class="in" id="${id}" data-set="F.${key}" data-re><option value="">Все</option>${opts.map(o=>`<option value="${esc(o[0])}" ${String(F[key])===String(o[0])?'selected':''}>${esc(o[1])}</option>`).join('')}</select></label>`;
+  const agg={};for(const r of rs){const t=getTest(r.run.testId);if(!t)continue;(r.answers||[]).forEach((a,i)=>{const q=t.questions[i];if(!q)return;const k=t.id+':'+i,o=agg[k]||(agg[k]={q:q.q,o:q.o,c:q.c,n:0,w:0,wc:{}});o.n++;if(a!==q.c){o.w++;if(a>=0)o.wc[a]=(o.wc[a]||0)+1}})}
+  const hard=Object.values(agg).filter(o=>o.n>=3&&o.w).sort((a,b)=>b.w/b.n-a.w/a.n).slice(0,6);
+  const byLvl=LEVELS.map(l=>({l,rs:rs.filter(r=>r.run.level===l.n)})),bySec=S.sections.map(s=>({s,rs:rs.filter(r=>r.run.sectionId===s.id)})).filter(x=>x.rs.length).sort((a,b)=>a.s.name.localeCompare(b.s.name,'ru'));
+  return `<div class="head"><div><h1>Статистика</h1><div class="muted">Все показатели рассчитаны по сохранённым результатам тестов</div></div><span class="sp"></span><button class="btn" data-a="f-reset">Сбросить фильтры</button></div>
+  <div class="card grid" style="grid-template-columns:repeat(6,minmax(0,1fr));gap:12px">${sel('fSec','section','Класс',S.sections.slice().sort((a,b)=>a.name.localeCompare(b.name,'ru')).map(s=>[s.id,s.name]))}${sel('fSub','subject','Предмет',uniq('subject').map(x=>[x,x]))}${sel('fTop','topic','Тема',uniq('topic').map(x=>[x,x.length>44?x.slice(0,44)+'…':x]))}${sel('fLvl','level','Уровень',LEVELS.map(l=>[l.n,l.n+' · '+l.name]))}
+   <label class="field">Дата с<input class="in" id="fFrom" type="date" data-set="F.from" data-re value="${esc(F.from)}"></label><label class="field">Дата по<input class="in" id="fTo" type="date" data-set="F.to" data-re value="${esc(F.to)}"></label></div>
+  ${rs.length?`<div class="grid g4">${kpi('Тестов',runs.length)}${kpi('Попыток',rs.length)}${kpi('Средний результат',r0(avg(rs.map(r=>r.pct)))+'%')}${kpi('Средняя оценка',r1(avg(rs.map(r=>r.mark))))}</div>
+  <div class="grid g21"><div class="card"><h2 style="margin-bottom:12px">Динамика результатов</h2>${lineChart(trend(runs.map(r=>({...r,rows:rs.filter(x=>x.run.id===r.id)}))))}</div>
+   <div class="card"><h2 style="margin-bottom:12px">По уровням сложности</h2>${byLvl.map(x=>`<div class="row small" style="margin:10px 0"><span style="width:118px">${x.l.n} · ${x.l.name}</span>${bar(avg(x.rs.map(r=>r.pct)))}<span class="num" style="width:40px;text-align:right">${x.rs.length?r0(avg(x.rs.map(r=>r.pct)))+'%':'—'}</span></div>`).join('')}</div></div>
+  <div class="grid g2"><div class="card"><h2 style="margin-bottom:10px">Самые сложные вопросы и частые ошибки</h2>${hard.length?hard.map(o=>{const top=Object.entries(o.wc).sort((a,b)=>b[1]-a[1])[0];return `<div style="padding:11px 0;border-top:1px solid var(--line)"><div class="row"><b style="flex:1">${esc(o.q)}</b><span class="chip red num">${r0(o.w/o.n*100)}% ошибок</span></div><div class="small muted" style="margin-top:4px">Верный ответ: ${esc(o.o[o.c])}${top?`<br>Чаще всего выбирали: «${esc(o.o[top[0]])}» — ${plural(top[1],'раз','раза','раз')}`:''}</div></div>`}).join(''):empty('Недостаточно ответов, чтобы выделить сложные вопросы.')}</div>
+   <div class="card"><h2 style="margin-bottom:10px">Результаты классов</h2><div class="list">${bySec.map(x=>`<div class="row" style="cursor:pointer" data-a="go" data-h="class-${x.s.id}"><b style="width:80px">${esc(x.s.name)}</b>${bar(avg(x.rs.map(r=>r.pct)))}<span class="num" style="width:44px;text-align:right">${r0(avg(x.rs.map(r=>r.pct)))}%</span></div>`).join('')}</div></div></div>`
+  :empty(S.runs.length?'По выбранным фильтрам результатов нет. Измените фильтры.':'Статистика появится после первого проведённого теста.')}`}
+A['f-reset']=()=>{M.F={section:'',subject:'',topic:'',level:'',from:'',to:''};render()};
+
+/* ---------- materials & PDF ---------- */
+/* ---------- темы учебников (оглавления официальных учебников 1–11 классов) ---------- */
+const SUBJ_RU={'ona-tili':'Родной язык (она тили)','alifbe':'Букварь (алифбе)','matematika':'Математика','algebra':'Алгебра','geometriya':'Геометрия','oqish':'Чтение','oqish-savodxonligi':'Грамотность чтения','texnologiya':'Технология','tasviriy-sanat':'Изобразительное искусство','tabiiy-fanlar':'Естествознание','tabiatshunoslik':'Естествознание','atrofimizdagi-olam':'Окружающий мир','ingliz-tili':'Английский язык','nemis-tili':'Немецкий язык','fransuz-tili':'Французский язык','rus-tili':'Русский язык','ozbek-tili':'Узбекский язык','musiqa':'Музыка','jismoniy-tarbiya':'Физкультура','informatika':'Информатика','odobnoma':'Этика (одобнома)','tarbiya':'Воспитание','nutq-ostirish-maxsus':'Развитие речи','adabiyot':'Литература','vatan-tuygusi':'Чувство Родины','tarixdan-hikoyalar':'Рассказы из истории','qadimgi-dunyo-tarixi':'История древнего мира','biologiya':'Биология','botanika':'Биология','zoologiya':'Биология','odam-va-uning-salomatligi':'Биология','fizika':'Физика','fizika-afudm':'Физика','kimyo':'Химия','organik-kimyo':'Химия','umumiy-kimyo':'Химия','geografiya':'География','ijtimoiy-iqtisodiy-geografiya':'География','jahon-ijtimoiy-iqtisodiy-geografiyasi':'География','jahon-tarixi':'Всемирная история','ozbekiston-tarixi':'История Узбекистана','milliy-istiqlol-goyasi':'Идея национальной независимости','ozbekiston-davlati-va-huquqi-asoslari':'Основы государства и права','konstitutsiyaviy-huquq-asoslari':'Основы конституционного права','davlat-va-huquq':'Государство и право','iqtisodiy-bilim-asoslari':'Основы экономических знаний','iqtisodiy-bilimlar':'Основы экономических знаний','chizmachilik':'Черчение','chaquvga-qadar-boshlangich-tayyorgarlik':'Допризывная подготовка','dunyo-dinlari-tarixi':'История мировых религий','manaviyat-asoslari':'Основы духовности','tadbirkorlik':'Предпринимательство','astronomiya':'Астрономия'};
+const LAT={'а':'a','о':'o','е':'e','р':'p','с':'c','х':'x','у':'y','к':'k','м':'m','н':'n','в':'v','т':'t','А':'A','О':'O','Е':'E','Р':'P','С':'C','Х':'X','К':'K','М':'M','Н':'N','В':'B','Т':'T','і':'i'};
+function fixLine(x){x=String(x||'').replace(/\s+/g,' ').trim();if(/[а-яА-Я]/.test(x)&&/[a-z]{2}/.test(x)&&/[ʻ‘’]/.test(x)){if(/[a-z]/.test(x)&&(x.match(/[а-яА-Я]/g)||[]).length<(x.match(/[a-zA-Z]/g)||[]).length*3){x=x.replace(/t/g,'i').replace(/[а-яА-Яі]/g,c=>LAT[c]||c)}}
+  return x.replace(/^Ò/,'T').replace(/^(\d+(\s*[–-]\s*\d+)?\s*-\s*(darslar|mavzular|dars|mavzu)\s*\.?\s*)/i,'').replace(/^\d+(\s*[–-]\s*\d+)?\s*-?\s*§\.?\s*/,'').replace(/^\d+\.\d+\.\s*/,'').replace(/^\d{1,3}\.\s+(?=\S)/,'').trim()}
+function normCurr(raw){const out={};for(const g in raw){const subs={};Object.keys(raw[g]).sort().forEach(key=>{const v=raw[g][key];const base=key.replace(/^\d+-sinf-/,'').replace(/-\d+-qism$/,'').replace(/-\d+-\d+$/,'');const part=+(key.match(/-(\d+)-qism$/)||[0,1])[1];
+    const n=SUBJ_RU[base]||base.replace(/-/g,' ').replace(/^./,c=>c.toUpperCase());const k=n.replace(/[^a-zа-яё0-9]+/gi,'_').toLowerCase();
+    const chs=[];let cur={h:'',t:[]};const push=()=>{if(cur.t.length||cur.h)chs.push(cur)};
+    (v.i||[]).forEach(it=>{if(typeof it==='string'){const t=fixLine(it);if(t)cur.t.push(t)}else{push();cur={h:fixLine(it.h),t:(it.s||[]).map(fixLine).filter(Boolean)}}});push();
+    if(!chs.some(c=>c.t.length))return;
+    const book=(v.t||'').replace(/\s+/g,' ').trim();(subs[k]=subs[k]||{n,b:'',parts:[]}).parts.push({part,book,chs})});
+  out[g]={};for(const k in subs){const x=subs[k];x.parts.sort((a,b)=>a.part-b.part);out[g][k]={n:x.n,b:x.parts.map(p=>p.book).filter(Boolean).join(' · '),c:x.parts.flatMap(p=>x.parts.length>1?[{h:p.book,t:[]},...p.chs]:p.chs).filter(c=>c.t.length||c.h)}}
+  if(!Object.keys(out[g]).length)delete out[g]}return out}
+let CURR_RAW=null;window.CURR={};
+async function loadCurr(){try{let raw=null;if(db){const snap=await db.collection('curriculum').get();if(snap.docs.length){raw={};snap.docs.forEach(d=>{const x=d.data();if(x&&x.g&&x.d)raw[x.g]=JSON.parse(x.d)})}}
+  if(!raw)raw=ls('kl-curr');if(raw){CURR_RAW=raw;window.CURR=normCurr(raw);softRender()}}catch(e){}}
+async function saveCurr(raw){if(!raw||typeof raw!=='object')throw new Error('bad');const ok=Object.keys(raw).filter(g=>/^\d{1,2}$/.test(g)&&raw[g]&&typeof raw[g]==='object');if(!ok.length)throw new Error('bad');
+  CURR_RAW=raw;window.CURR=normCurr(raw);ls('kl-curr',raw);if(db)for(const g of ok)await db.doc('curriculum/g'+g).set({g,d:JSON.stringify(raw[g]),ts:Date.now()});render()}
+window.addEventListener('message',e=>{const d=e.data;if(d&&d.type==='kl-curr-import'&&d.raw){saveCurr(d.raw).then(()=>{toast('Темы учебников загружены: '+Object.keys(window.CURR).length+' классов');try{e.source&&e.source.postMessage({type:'kl-curr-ok',n:JSON.stringify(window.CURR).length},'*')}catch(_){}}).catch(()=>toast('Не удалось сохранить темы учебников',true))}});
+A['curr-file']=()=>{const i=document.createElement('input');i.type='file';i.accept='.json,application/json';i.onchange=async()=>{try{const raw=JSON.parse(await i.files[0].text());await saveCurr(raw);toast('Темы учебников загружены')}catch(e){toast('Это не файл оглавлений учебников (darslik_mundarija.json)',true)}};i.click()};
+const ALL_SUBJ=[...new Set(Object.values(SUBJ_RU))].sort((a,b)=>a.localeCompare(b,'ru'));
+const mySubj=()=>{const m=meta().subjects;return m&&m.length?m:ALL_SUBJ};
+const CUR=()=>window.CURR||{};
+function curSubjects(g){return Object.entries(CUR()[g]||{}).map(([k,v])=>({k,...v}))}
+function curFind(g,name){name=(name||'').toLowerCase();return curSubjects(g).filter(x=>x.n.toLowerCase()===name||x.k===name||(x.al||[]).some(a=>a.toLowerCase()===name))}
+function curTopics(g,name){const out=[];(name?curFind(g,name):curSubjects(g)).forEach(x=>x.c.forEach(ch=>ch.t.forEach(t=>out.push(t))));return [...new Set(out)]}
+function dlSubjects(g){return `<datalist id="dlSubj">${[...new Set(curSubjects(g).map(x=>x.n))].map(n=>`<option value="${esc(n)}">`).join('')}</datalist>`}
+function dlTopics(g,sub){const t=curTopics(g,sub);return `<datalist id="dlTopic">${(t.length?t:curTopics(g)).map(n=>`<option value="${esc(n)}">`).join('')}</datalist>`}
+function dlTopicsAll(){const o=[];for(const g in CUR())curSubjects(g).forEach(x=>x.c.forEach(ch=>ch.t.forEach(t=>o.push(`<option value="${esc(t)}">${g} кл. · ${esc(x.n)}</option>`))));return `<datalist id="dlTopicAll">${o.join('')}</datalist>`}
+function booksView(r){const parts=r.split('-'),g=+parts[1]||0,k=parts.slice(2).join('-');const grades=Object.keys(CUR()).map(Number).sort((a,b)=>a-b);
+  if(!grades.length)return `<div class="head"><div><h1>Темы учебников</h1></div></div><div class="card" style="display:flex;flex-direction:column;gap:12px;align-items:flex-start"><b>Оглавления учебников ещё не загружены на сервер.</b><div class="muted small">Загрузите файл darslik_mundarija.json (оглавления всех учебников 1–11 классов) — темы сразу появятся у всех учителей.</div><button class="btn pri" data-a="curr-file">Загрузить файл оглавлений</button></div>`;
+  const tabs=`<div class="row" style="flex-wrap:wrap;gap:6px">${grades.map(x=>`<button class="btn small${x===g?' pri':''}" data-a="go" data-h="books-${x}">${x} класс</button>`).join('')}</div>`;
+  const head=`<div class="head"><div><h1>Темы учебников</h1><div class="muted">Оглавления официальных учебников Узбекистана, 1–11 классы. Темы взяты из самих учебников — у каждого класса свои.</div></div><span class="sp"></span><button class="btn small" data-a="curr-file">Обновить файл оглавлений</button></div>`;
+  if(!g)return head+`<div class="card">${tabs}<p class="muted small" style="margin:14px 0 0">Выберите класс.</p></div>`;
+  const subs=curSubjects(g);const cur=subs.find(x=>x.k===k);
+  const list=`<div class="card"><h2 style="margin-bottom:10px">${g} класс — учебники (${subs.length})</h2><div class="row" style="flex-wrap:wrap;gap:6px">${subs.map(x=>`<button class="btn small${cur&&x.k===cur.k?' pri':''}" data-a="go" data-h="books-${g}-${x.k}">${esc(x.n)}</button>`).join('')}</div></div>`;
+  const body=cur?`<div class="card"><h2>${esc(cur.n)}, ${g} класс</h2><div class="tiny muted" style="margin:4px 0 14px">${esc(cur.b||'')} · ${cur.c.reduce((a,c)=>a+c.t.length,0)} тем</div>${cur.c.map(ch=>`${ch.h?`<h3 style="margin:16px 0 6px">${esc(ch.h)}</h3>`:''}<ol style="margin:0;padding-left:22px;display:flex;flex-direction:column;gap:4px">${ch.t.map(t=>`<li>${esc(t)}</li>`).join('')}</ol>`).join('')}</div>`:'<div class="card muted">Выберите учебник, чтобы увидеть все его темы.</div>';
+  return head+`<div class="card">${tabs}</div>`+list+body}
+function materialsView(){const ms=[...S.materials].sort((a,b)=>b.ts-a.ts);
+  return `<div class="head"><div><h1>Учебные материалы</h1><div class="muted">Учебники в PDF, ссылки и заметки. По тексту учебника можно составить тест.</div></div><span class="sp"></span><button class="btn" data-a="mat-form">${ic('plus')}Ссылка или заметка</button><label class="btn pri" style="cursor:pointer">${ic('plus')}Загрузить PDF учебника<input type="file" id="pdfFile" accept="application/pdf" hidden></label></div>
+  ${M.pdf?`<div class="card"><b>${esc(M.pdf)}</b></div>`:''}
+  ${ms.length?`<div class="grid g3">${ms.map(m=>`<div class="card" style="display:flex;flex-direction:column;gap:8px"><div class="row"><span class="chip ${m.kind==='pdf'?'blue':''}">${m.kind==='pdf'?'PDF · '+plural(m.pages,'страница','страницы','страниц'):m.kind==='link'?'ссылка':'заметка'}</span><span class="sp"></span><button class="btn sq danger" data-a="mat-del" data-id="${m.id}" aria-label="Удалить">${ic('trash')}</button></div><h3>${esc(m.title)}</h3><div class="tiny muted">${m.gradeNum?m.gradeNum+' класс · ':''}${fdate(m.ts)}</div>
+   ${m.kind==='link'?`<a href="${esc(m.url)}" target="_blank" rel="noopener" class="small" style="color:var(--blue);word-break:break-all">${esc(m.url)}</a>`:m.kind==='note'?`<div class="small muted" style="white-space:pre-wrap;max-height:120px;overflow:auto">${esc(m.text)}</div>`:''}
+   ${m.kind!=='link'?`<span class="sp" style="flex:1"></span><button class="btn pri" data-a="gen-form" data-id="${m.id}" ${sample?'':'disabled'}>Создать тест по материалу</button>${sample?'':'<div class="tiny muted">Составление вопросов по тексту доступно в опубликованной версии.</div>'}`:''}</div>`).join('')}</div>`
+  :empty('Материалов пока нет. Загрузите PDF учебника — платформа извлечёт текст, и по нему можно будет составлять вопросы строго по содержанию учебника.')}
+  <div class="tiny muted">Из PDF сохраняется только текст страниц; сам файл не хранится. Для сканов без текстового слоя текст извлечь нельзя.</div>`}
+A['mat-form']=()=>openModal(`<h2>Новый материал</h2><label class="field">Название<input class="in" id="mTitle"></label><label class="field">Класс<select class="in" id="mGrade"><option value="0">Не указан</option>${sortedGrades().map(g=>`<option value="${g.num}">${esc(g.name)}</option>`).join('')}</select></label><label class="field">Ссылка (если есть)<input class="in" id="mUrl" placeholder="https://"></label><label class="field">Текст заметки или фрагмента учебника<textarea class="in" id="mText" rows="6"></textarea></label><div class="row"><span class="sp"></span><button class="btn" data-a="close">Отмена</button><button class="btn pri" data-a="mat-save">Сохранить</button></div>`);
+A['mat-save']=()=>{const title=$('#mTitle').value.trim(),url=$('#mUrl').value.trim(),text=$('#mText').value.trim();if(!title)return toast('Введите название',true);if(!url&&!text)return toast('Добавьте ссылку или текст',true);if(url&&!/^https?:\/\//i.test(url))return toast('Ссылка должна начинаться с http:// или https://',true);
+  put('materials','m'+uid(),{title,gradeNum:+$('#mGrade').value,ts:Date.now(),kind:text?'note':'link',url,text:text.slice(0,60000)});log(`Добавлен материал: ${title}`);closeModal();toast('Материал сохранён')};
+A['mat-del']=d=>{const m=S.materials.find(x=>x.id===d.id);confirmBox(`Удалить материал «${m.title}»?`,async()=>{if(m.kind==='pdf'){for(let i=0;i<(m.chunks||0);i++){if(db)db.doc(`${cp('matchunks')}/${m.id}-${i}`).delete().catch(()=>{});else ls(`kl-ch-${me.tid}-${m.id}-${i}`,null)}}del('materials',m.id);log(`Удалён материал: ${m.title}`);toast('Материал удалён')},'Удалить')};
+const addScript=src=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>no(new Error('script'));document.head.appendChild(s)});
+async function pdfChosen(inp){const file=inp.files[0];if(!file)return;const say=t=>{M.pdf=t;render()};
+  try{say('Подготовка к чтению PDF…');if(!window.pdfjsLib){await addScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');await addScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js')}
+    const pdf=await window.pdfjsLib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise,n=Math.min(pdf.numPages,600);let chunks=[''],total=0;
+    for(let p=1;p<=n;p++){if(p%5===1)say(`Читаю «${file.name}»: страница ${p} из ${n}…`);const tc=await(await pdf.getPage(p)).getTextContent();const txt=tc.items.map(i=>i.str).join(' ').replace(/\s+/g,' ').trim();total+=txt.length;const piece=`[[p:${p}]]${txt}\n`;if(chunks[chunks.length-1].length+piece.length>40000)chunks.push('');chunks[chunks.length-1]+=piece}
+    if(total<n*20){M.pdf='';render();return toast('В этом PDF нет текстового слоя (скорее всего, это скан). Текст извлечь не удалось.',true)}
+    const id='m'+uid();for(let i=0;i<chunks.length;i++){if(db)await db.doc(`${cp('matchunks')}/${id}-${i}`).set({mid:id,n:i,text:chunks[i]});else ls(`kl-ch-${me.tid}-${id}-${i}`,chunks[i])}
+    M.pdf='';put('materials',id,{title:file.name.replace(/\.pdf$/i,''),kind:'pdf',pages:n,chunks:chunks.length,gradeNum:0,ts:Date.now()});log(`Загружен учебник: ${file.name}`);toast('Учебник загружен, текст извлечён')}
+  catch(e){M.pdf='';render();toast(e&&e.code==='quota_exceeded'?'Хранилище заполнено — удалите старые материалы.':'Не удалось прочитать PDF. Проверьте файл и попробуйте ещё раз.',true)}}
+async function materialText(m,from,to){if(m.kind!=='pdf')return m.text||'';let all='';for(let i=0;i<m.chunks;i++){if(db){const s=await db.doc(`${cp('matchunks')}/${m.id}-${i}`).get();all+=s.exists?s.data().text:''}else all+=ls(`kl-ch-${me.tid}-${m.id}-${i}`)||''}
+  const parts=all.split(/\[\[p:(\d+)\]\]/);let out='';for(let i=1;i<parts.length;i+=2){const p=+parts[i];if(p>=from&&p<=to)out+=`\n(стр. ${p}) ${parts[i+1]}`}return out}
+A['gen-form']=d=>{const m=S.materials.find(x=>x.id===d.id),gn=m.gradeNum||(sortedGrades()[0]||{}).num||5;
+  openModal(`<h2>Тест по материалу</h2><div class="muted small">«${esc(m.title)}». Вопросы составляются только по тексту выбранных страниц. Тест сохранится как черновик — проверьте его перед публикацией.</div>
+  ${m.kind==='pdf'?`<div class="grid g2"><label class="field">Страницы с<input class="in" id="gFrom" type="number" min="1" max="${m.pages}" value="1"></label><label class="field">по<input class="in" id="gTo" type="number" min="1" max="${m.pages}" value="${Math.min(m.pages,12)}"></label></div>`:''}
+  <div class="grid g3"><label class="field">Класс<select class="in" id="gGrade">${sortedGrades().map(g=>`<option value="${g.num}" ${g.num===gn?'selected':''}>${esc(g.name)}</option>`).join('')}</select></label><label class="field">Уровень<select class="in" id="gLevel">${LEVELS.map(l=>`<option value="${l.n}" ${l.n===3?'selected':''}>${l.n} · ${l.name}</option>`).join('')}</select></label><label class="field">Вопросов<input class="in" id="gCount" type="number" min="5" max="30" value="20"></label></div>
+  <label class="field">Тема<input class="in" id="gTopic" list="dlTopicAll" placeholder="Начните вводить — темы из учебников">${dlTopicsAll()}</label><div id="gMsg" class="small muted"></div><div class="row"><span class="sp"></span><button class="btn" data-a="close">Отмена</button><button class="btn pri" id="gBtn" data-a="gen-run" data-id="${m.id}">Составить вопросы</button></div>`)};
+A['gen-run']=async(d,btn)=>{const m=S.materials.find(x=>x.id===d.id),from=+($('#gFrom')||{}).value||1,to=+($('#gTo')||{}).value||1,num=+$('#gGrade').value,lvl=+$('#gLevel').value,cnt=Math.max(5,Math.min(30,+$('#gCount').value||20)),topic=$('#gTopic').value.trim(),msg=$('#gMsg');
+  if(m.kind==='pdf'&&to<from)return toast('Проверьте диапазон страниц',true);btn.disabled=true;msg.textContent='Читаю текст и составляю вопросы… Это может занять до минуты.';
+  try{let text=(await materialText(m,from,to)).trim();if(text.length<400)throw{user:'В выбранных страницах слишком мало текста. Расширьте диапазон.'};const cut=text.length>60000;text=text.slice(0,60000);
+    const res=await sample.json(`Ты опытный школьный методист. Составь тест для ${num} класса школы Узбекистана. Предмет: ${subjectFor(num)}. Уровень сложности ${lvl} из 5 («${LV(lvl).name}»: ${LV(lvl).desc}).\nСоставь ровно ${cnt} вопросов СТРОГО по тексту учебника ниже. Не используй факты, которых нет в тексте. Вопросы не должны повторяться, язык — грамотный русский, формулировки соответствуют возрасту. У каждого вопроса 4 варианта ответа и ровно один правильный; правильный ответ должен стоять на разных позициях.\nВерни только JSON вида {"questions":[{"q":"текст вопроса","o":["вариант","вариант","вариант","вариант"],"c":0}]}, где c — номер правильного варианта от 0 до 3.\n\nТЕКСТ УЧЕБНИКА:\n${text}`,{cache:false});
+    const qs=((res&&res.questions)||[]).filter(q=>q&&typeof q.q==='string'&&Array.isArray(q.o)&&q.o.length>=2&&Number.isInteger(q.c)&&q.c>=0&&q.c<q.o.length).map(q=>({q:q.q,o:q.o.map(String).slice(0,6),c:q.c}));if(!qs.length)throw{user:'Не удалось составить вопросы по этому тексту. Попробуйте другой диапазон страниц.'};
+    M.B={id:'t'+uid(),isNew:true,title:`${m.title}${m.kind==='pdf'?`, стр. ${from}–${to}`:''}`,subject:subjectFor(num),topic:topic||`По материалу «${m.title}»`,gradeNum:num,level:lvl,minutes:20,status:'draft',questions:qs};closeModal();toast(`Составлено вопросов: ${qs.length}${cut?'. Текст был длинным — использована его первая часть':''}. Проверьте и опубликуйте.`);go('builder')}
+  catch(e){btn.disabled=false;msg.textContent='';toast(e&&e.user?e.user:e&&e.code==='rate_limited'?'Слишком много запросов. Подождите минуту и повторите.':'Не удалось составить вопросы. Попробуйте ещё раз.',true)}};
+
+/* ---------- settings ---------- */
+function prefsView(){const m=meta(),th=m.th||[85,70,50,30],li=logItems();
+  return `<div class="head"><h1>Настройки</h1></div>
+  <div class="grid g2"><div class="card" style="display:flex;flex-direction:column;gap:14px"><h2>Профиль и платформа</h2><label class="field">Имя учителя<input class="in" id="pTeacher" value="${esc(m.teacher||'')}"></label><label class="field">Название платформы<input class="in" id="pName" value="${esc(m.name||'Diplomat')}"></label><div><button class="btn pri" data-a="p-save">Сохранить</button></div></div>
+   <div class="card" style="display:flex;flex-direction:column;gap:14px;grid-column:1/-1"><h2>Мои предметы</h2><div class="muted small">Отметьте предметы, которые вы ведёте. Они появятся при создании тестов.</div>
+   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px">${ALL_SUBJ.map(n=>`<label class="row" style="gap:8px;cursor:pointer"><input type="checkbox" class="pSubj" value="${esc(n)}" ${(meta().subjects||[]).includes(n)?'checked':''}> ${esc(n)}</label>`).join('')}</div>
+   <div><button class="btn pri" data-a="p-subj">Сохранить предметы</button></div></div>
+   <div class="card" style="display:flex;flex-direction:column;gap:14px"><h2>Шкала оценок</h2><div class="muted small">Минимальный процент правильных ответов для каждой оценки. Ниже порога «2» выставляется «1».</div><div class="grid g4" style="gap:10px">${[5,4,3,2].map((mk,i)=>`<label class="field">Оценка ${mk}, от %<input class="in" id="pTh${i}" type="number" min="1" max="100" value="${th[i]}"></label>`).join('')}</div><div><button class="btn pri" data-a="p-th">Сохранить шкалу</button></div>
+</div></div>
+  <div class="grid g2"><div class="card" style="display:flex;flex-direction:column;gap:12px"><h2>Данные</h2><div class="small"><span class="dot${db?'':' off'}"></span>${db?'Подключена база данных: изменения сохраняются сразу и видны на всех ваших устройствах.':'База данных недоступна в этом окне: данные сохраняются только в этом браузере.'}</div>
+    <div class="row" style="flex-wrap:wrap"><button class="btn" data-a="p-restore-b">Восстановить встроенные тесты</button></div>
+    <div style="border:1px solid var(--red-soft);background:#FFF8F8;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px"><h3 style="color:var(--red)">Обнулить всё</h3><div class="small muted">Удаляет все результаты тестов, групповые сессии, ваши тесты и правки встроенных, учебные материалы и историю изменений. Остаются только классы и подразделения.</div><div><button class="btn" style="background:var(--red);color:#fff" data-a="p-reset">Обнулить всё</button></div></div>
+    <h3>Резервная копия</h3><div class="muted small">Копия содержит классы, тесты и результаты. Имён учеников в платформе нет. Сохраните текст в файл; чтобы восстановить, вставьте его обратно.</div><textarea class="in small" id="bkOut" rows="4" placeholder="Нажмите «Создать копию» или вставьте сюда сохранённую копию" aria-label="Резервная копия"></textarea><div class="row" style="flex-wrap:wrap"><button class="btn" data-a="bk-make">Создать копию</button><button class="btn" data-a="bk-copy">Скопировать</button><button class="btn danger" data-a="bk-load">Восстановить из копии</button></div></div>
+   <div class="card"><h2 style="margin-bottom:8px">История изменений</h2>${li.length?`<div class="list" style="max-height:420px;overflow:auto">${li.slice(0,60).map(x=>`<div class="row small"><span>${esc(x.x)}</span><span class="sp"></span><span class="muted tiny num" style="white-space:nowrap">${fdt(x.t)}</span></div>`).join('')}</div>`:empty('Изменений пока нет.')}</div></div>`}
+function resetAll(){S.runs.slice().forEach(r=>del('runs',r.id,true));S.sessions.slice().forEach(x=>del('sessions',x.id,true));S.tests.slice().forEach(t=>del('tests',t.id,true));
+  S.materials.slice().forEach(m=>{for(let i=0;i<(m.chunks||0);i++){if(db)db.doc(`${cp('matchunks')}/${m.id}-${i}`).delete().catch(()=>{});else ls(`kl-ch-${me.tid}-${m.id}-${i}`,null)}del('materials',m.id,true)});
+  put('app','log',{items:[]},true);Q=null;R=null;L=null;M.B=null;ls('kl-run-'+(me?me.tid:'x'),null);if(G&&G.rm)G.rm.leave().catch(()=>{});G=null}
+A['p-reset']=()=>confirmBox('Обнулить платформу? Будут удалены все результаты, тесты, материалы и история. Останутся только классы. Это действие нельзя отменить.',()=>{resetAll();toast('Готово: остались только классы');go('classes')},'Обнулить всё');
+A['p-subj']=()=>{const v=[...document.querySelectorAll('.pSubj:checked')].map(x=>x.value);setMeta({subjects:v});toast(v.length?'Предметы сохранены: '+v.length:'Предметы не выбраны — будут показаны все')};
+A['p-save']=()=>{setMeta({teacher:$('#pTeacher').value.trim(),name:$('#pName').value.trim()||'Diplomat'});toast('Сохранено')};
+A['p-th']=()=>{const th=[0,1,2,3].map(i=>+$('#pTh'+i).value);if(th.some(x=>!(x>0&&x<=100))||!(th[0]>th[1]&&th[1]>th[2]&&th[2]>th[3]))return toast('Пороги должны убывать: «5» выше «4», «4» выше «3», «3» выше «2»',true);setMeta({th});log('Изменена шкала оценок');toast('Шкала сохранена, оценки пересчитаны')};
+A['p-restore-b']=()=>{const ov=S.tests.filter(t=>/^b\d+-\d$/.test(t.id));if(!ov.length)return toast('Встроенные тесты не изменялись');confirmBox(`Вернуть встроенные тесты к исходному виду (${ov.length})? Ваши правки в них будут потеряны.`,()=>{ov.forEach(t=>del('tests',t.id,true));log('Встроенные тесты восстановлены');toast('Встроенные тесты восстановлены');render()})};
+A['bk-make']=()=>{const o={v:1,ts:Date.now()};['grades','sections','tests','runs','app'].forEach(c=>o[c]=S[c]);$('#bkOut').value=JSON.stringify(o);toast('Копия создана — скопируйте и сохраните текст')};
+A['bk-copy']=()=>{const v=$('#bkOut').value;if(!v)return toast('Сначала создайте копию',true);A.copy({v})};
+A['bk-load']=()=>{let o;try{o=JSON.parse($('#bkOut').value)}catch(e){return toast('Текст копии повреждён или пуст',true)}if(!o||!Array.isArray(o.grades)||!Array.isArray(o.sections))return toast('Это не резервная копия платформы',true);
+  confirmBox('Заменить текущие классы, тесты и результаты данными из копии?',()=>{['grades','sections','tests','runs','app'].forEach(c=>{const keep=new Set((o[c]||[]).map(x=>x.id));S[c].filter(x=>!keep.has(x.id)).forEach(x=>del(c,x.id,true));(o[c]||[]).forEach(x=>x&&x.id&&put(c,x.id,x,true))});log('Данные восстановлены из резервной копии');toast('Данные восстановлены');render()},'Восстановить')};
+
+/* ---------- администратор: аналитика всей школы ---------- */
+const AD={st:'idle',T:[],err:'',q:'',cls:null,f:{grade:'',subject:''},form:{}};
+const pctRun=r=>{let c=0,t=0;(r.rows||[]).forEach(w=>{c+=w.correct||0;t+=w.total||0});return t?c/t*100:null};
+const normCls=n=>String(n||'').toUpperCase().replace(/\s+/g,'').replace(/КЛАСС/g,'').replace(/[«»"']/g,'');
+async function admLoad(){AD.st='loading';render();try{let accs=[];
+  if(db){const sn=await db.collection('accounts').get();accs=sn.docs.map(d=>({id:d.id,...d.data()}))}else{const a=ls('kl-accounts')||{};accs=Object.entries(a).map(([id,v])=>({id,...v}))}
+  if(!accs.some(a=>a.id===BOOT_ADMIN.id))accs.unshift({...BOOT_ADMIN});AD.accs=accs;const T=[];for(const a of accs){if(a.role==='admin')continue;const o={id:a.id,name:(a.first||'')+' '+(a.last||''),created:a.created,grades:[],sections:[],runs:[],app:[]};
+    if(db){for(const c of ['grades','sections','runs','app']){try{const sn=await db.collection('t/'+a.id+'/'+c).get();o[c]=sn.docs.map(d=>({id:d.id,...d.data()}))}catch(e){}}}
+    else{const d=ls('kl-data-'+a.id)||{};['grades','sections','runs','app'].forEach(c=>o[c]=d[c]||[])}
+    const m=(o.app.find(x=>x.id==='meta')||{});o.subjects=m.subjects||[];T.push(o)}
+  AD.T=T;AD.st='ok';AD.at=Date.now()}catch(e){AD.st='err';AD.err='Не удалось загрузить данные учителей'}render()}
+function admFacts(){const runs=[];AD.T.forEach(t=>{const gN=Object.fromEntries(t.grades.map(g=>[g.id,g.num])),sec=Object.fromEntries(t.sections.map(s=>[s.id,s]));
+  t.runs.forEach(r=>{const p=pctRun(r);if(p==null)return;const s=sec[r.sectionId]||{};const num=gN[r.gradeId||s.gradeId]||parseInt(s.name)||0;
+    runs.push({...r,p,teacher:t.name,tid:t.id,grade:num,cls:s.name||'Класс',key:num+'|'+normCls(s.name||'?'),students:(r.rows||[]).length})})});
+  return runs.filter(r=>(!AD.f.grade||r.grade===+AD.f.grade)&&(!AD.f.subject||r.subject===AD.f.subject))}
+const aAvg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+function aGroup(a,k){const m=new Map();a.forEach(x=>{const v=typeof k==='function'?k(x):x[k];if(!m.has(v))m.set(v,[]);m.get(v).push(x)});return m}
+function rankCls(runs){return [...aGroup(runs,'key')].map(([k,rs])=>({key:k,cls:rs[0].cls,grade:rs[0].grade,avg:aAvg(rs.map(r=>r.p)),n:rs.length,subj:new Set(rs.map(r=>r.subject)).size})).sort((a,b)=>b.avg-a.avg)}
+const tone=p=>p>=85?'g5':p>=70?'g4':p>=50?'g3':'g2';
+function admPodium(list,label){const L=list.slice(0,3);if(!L.length)return '<div class="ad-empty">Пока нет проведённых тестов</div>';const ord=[1,0,2].filter(i=>L[i]);
+  return `<div class="pod">${ord.map(i=>{const x=L[i];return `<button class="pod-i p${i+1}" data-a="adm-cls" data-k="${esc(x.key)}"><div class="pod-n">${esc(x.cls)}</div><div class="pod-v">${r0(x.avg)}<small>%</small></div><div class="pod-s">${label(x)}</div><div class="pod-b"><b>${i+1}</b></div></button>`}).join('')}</div>`}
+function adminView(r){const nm=esc(me.first+' '+me.last);
+  const head=`<header class="ad-top"><div class="ad-brand"><img src="logo.png" alt=""><div><b>Diplomat</b><small>Аналитика школы</small></div><span class="by">By Mirtemirov Ozodbek</span></div><nav class="ad-nav">${[['home','Дашборд'],['adm-teachers','Учителя'],['adm-acc','Аккаунты']].map(([h,t])=>`<button class="${(r===h||(h==='home'&&!['adm-teachers','adm-acc'].includes(r)))?'on':''}" data-a="go" data-h="${h}">${t}</button>`).join('')}</nav><div class="ad-me"><span>${nm}<small>Администратор</small></span><button class="ad-ib" data-a="adm-reload" title="Обновить данные">↻</button><button class="ad-ib" data-a="lg-out" title="Выйти">⏻</button></div></header>`;
+  let body='';
+  if(AD.st==='idle'){AD.st='loading';setTimeout(admLoad,0);body='<div class="ad-load">Собираю данные всех учителей…</div>'}
+  else if(AD.st==='loading')body='<div class="ad-load">Собираю данные всех учителей…</div>';
+  else if(AD.st==='err')body=`<div class="ad-load">${esc(AD.err)} <button class="ad-btn" data-a="adm-reload">Повторить</button></div>`;
+  else if(r==='adm-acc')body=admAccView();
+  else if(r==='adm-teachers')body=admTeachersView();
+  else if(AD.cls)body=admClassView(AD.cls);
+  else body=admDash();
+  return `<div class="adm">${head}<main class="ad-main">${body}</main></div>`}
+function admFilters(){const all=[];AD.T.forEach(t=>t.runs.forEach(r=>r.subject&&all.push(r.subject)));const subs=[...new Set(all)].sort((a,b)=>a.localeCompare(b,'ru'));
+  return `<div class="ad-f"><select data-a2="grade"><option value="">Все классы</option>${[1,2,3,4,5,6,7,8,9,10,11].map(n=>`<option value="${n}" ${+AD.f.grade===n?'selected':''}>${n} класс</option>`).join('')}</select><select data-a2="subject"><option value="">Все предметы</option>${subs.map(s=>`<option ${AD.f.subject===s?'selected':''}>${esc(s)}</option>`).join('')}</select>${AD.f.grade||AD.f.subject?'<button class="ad-btn ghost" data-a="adm-freset">Сбросить</button>':''}<span class="ad-at">Обновлено ${AD.at?fdt(AD.at):''}</span></div>`}
+function admDash(){const runs=admFacts(),cls=rankCls(runs),sAvg=aAvg(runs.map(r=>r.p));
+  const byT=[...aGroup(runs,'tid')].map(([k,rs])=>({name:rs[0].teacher,n:rs.length,avg:aAvg(rs.map(r=>r.p)),subs:[...new Set(rs.map(r=>r.subject))]}));
+  const most=[...byT].sort((a,b)=>b.n-a.n),best=[...byT].filter(t=>t.n>=1).sort((a,b)=>b.avg-a.avg);
+  const subj=[...aGroup(runs,'subject')].map(([k,rs])=>({k:k||'Без предмета',avg:aAvg(rs.map(r=>r.p)),n:rs.length})).sort((a,b)=>b.avg-a.avg);
+  const grades=[...aGroup(runs,'grade')].sort((a,b)=>a[0]-b[0]);
+  const kpi=(l,v,s)=>`<div class="ad-k"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
+  return `<div class="ad-hd"><h1>Школа в цифрах</h1>${admFilters()}</div>
+  <section class="ad-kpis">${kpi('Учителей',AD.T.length,'в системе')}${kpi('Проведено тестов',runs.length,'по выбранным фильтрам')}${kpi('Средний результат',sAvg==null?'—':r0(sAvg)+'%','по всем тестам')}${kpi('Активных классов',cls.length,'с результатами')}</section>
+  <section class="ad-grid"><div class="ad-card span2"><div class="ad-ct">Лучшие классы школы</div>${admPodium(cls,x=>`${x.grade} класс · ${plural(x.n,'тест','теста','тестов')}`)}</div>
+   <div class="ad-card"><div class="ad-ct">Предметы — средний результат</div>${subj.length?`<div class="ad-bars">${subj.map(s=>`<div class="ad-bar"><span>${esc(s.k)}</span><i><em class="${tone(s.avg)}" style="width:${r0(s.avg)}%"></em></i><b>${r0(s.avg)}%</b></div>`).join('')}</div>`:'<div class="ad-empty">Нет данных</div>'}</div></section>
+  <section class="ad-card"><div class="ad-ct">Рейтинг по параллелям — топ‑3 в каждой</div>${grades.length?`<div class="ad-par">${grades.map(([g,rs])=>{const top=rankCls(rs).slice(0,3);return `<div class="ad-pc"><div class="ad-pg">${g||'?'}<small>класс</small></div>${top.map((x,i)=>`<button class="ad-pr" data-a="adm-cls" data-k="${esc(x.key)}"><b class="m${i+1}">${i+1}</b><span>${esc(x.cls)}</span><em>${r0(x.avg)}%</em></button>`).join('')}</div>`}).join('')}</div>`:'<div class="ad-empty">Пока нет проведённых тестов</div>'}</section>
+  <section class="ad-grid"><div class="ad-card"><div class="ad-ct">Больше всего тестов провели</div>${admTList(most,t=>plural(t.n,'тест','теста','тестов'))}</div><div class="ad-card"><div class="ad-ct">Лучшие результаты классов у учителя</div>${admTList(best,t=>r0(t.avg)+'%')}</div>
+   <div class="ad-card"><div class="ad-ct">Последние тесты</div>${runs.length?`<div class="ad-feed">${[...runs].sort((a,b)=>b.ts-a.ts).slice(0,8).map(r=>`<button data-a="adm-cls" data-k="${esc(r.key)}"><span><b>${esc(r.cls)}</b> · ${esc(r.subject||'')}<small>${esc(r.teacher)} · ${fdt(r.ts)}</small></span><em class="${tone(r.p)}">${r0(r.p)}%</em></button>`).join('')}</div>`:'<div class="ad-empty">Нет данных</div>'}</div></section>`}
+function admTList(a,v){return a.length?`<ol class="ad-tl">${a.slice(0,6).map((t,i)=>`<li><b class="m${i+1}">${i+1}</b><span>${esc(t.name)}<small>${esc(t.subs.filter(Boolean).slice(0,3).join(', ')||'—')}</small></span><em>${v(t)}</em></li>`).join('')}</ol>`:'<div class="ad-empty">Нет данных</div>'}
+function admClassView(key){const runs=admFacts().filter(r=>r.key===key).sort((a,b)=>b.ts-a.ts);if(!runs.length){AD.cls=null;return admDash()}const a=aAvg(runs.map(r=>r.p));
+  const subj=[...aGroup(runs,'subject')].map(([k,rs])=>({k,avg:aAvg(rs.map(r=>r.p)),n:rs.length}));
+  return `<div class="ad-hd"><div><button class="ad-back" data-a="adm-back">← Дашборд</button><h1>${esc(runs[0].cls)} <span class="ad-sub">${runs[0].grade} класс</span></h1></div></div>
+  <section class="ad-kpis"><div class="ad-k"><div class="l">Средний результат</div><div class="v">${r0(a)}%</div><div class="s">по всем тестам класса</div></div><div class="ad-k"><div class="l">Тестов</div><div class="v">${runs.length}</div><div class="s">${new Set(runs.map(r=>r.teacher)).size} учит.</div></div><div class="ad-k"><div class="l">Предметов</div><div class="v">${subj.length}</div><div class="s">${esc(subj.map(s=>s.k).join(', '))}</div></div><div class="ad-k"><div class="l">Последний тест</div><div class="v sm">${fdt(runs[0].ts)}</div><div class="s">${esc(runs[0].subject||'')}</div></div></section>
+  <section class="ad-card"><div class="ad-ct">Все проведённые тесты</div><div class="scroll"><table class="ad-tbl"><thead><tr><th>Дата и время</th><th>Предмет</th><th>Тема</th><th>Учитель</th><th>Уровень</th><th>Формат</th><th>Ответов</th><th>Результат</th></tr></thead><tbody>${runs.map(r=>`<tr><td>${new Date(r.ts).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}</td><td>${esc(r.subject||'—')}</td><td>${esc(r.topic||r.title||'—')}</td><td>${esc(r.teacher)}</td><td>${r.level||'—'}</td><td>${r.mode==='group'?'Групповой':'На доске'}</td><td>${r.students}</td><td><em class="${tone(r.p)}">${r0(r.p)}%</em></td></tr>`).join('')}</tbody></table></div></section>`}
+function admTeachersView(){const runs=admFacts();return `<div class="ad-hd"><h1>Учителя</h1></div><section class="ad-card"><div class="scroll"><table class="ad-tbl"><thead><tr><th>Учитель</th><th>Предметы</th><th>Классов</th><th>Тестов</th><th>Средний результат</th><th>Последний тест</th></tr></thead><tbody>${AD.T.map(t=>{const rs=runs.filter(r=>r.tid===t.id),a=aAvg(rs.map(r=>r.p)),last=rs.sort((x,y)=>y.ts-x.ts)[0];return `<tr><td><b>${esc(t.name)}</b></td><td>${esc((t.subjects.length?t.subjects:[...new Set(rs.map(r=>r.subject))]).join(', ')||'—')}</td><td>${t.sections.length}</td><td>${rs.length}</td><td>${a==null?'—':`<em class="${tone(a)}">${r0(a)}%</em>`}</td><td>${last?fdt(last.ts):'—'}</td></tr>`}).join('')||'<tr><td colspan="6">Учителей пока нет</td></tr>'}</tbody></table></div></section>`}
+function admAccView(){const F=AD.form;return `<div class="ad-hd"><h1>Аккаунты</h1></div><section class="ad-grid"><form class="ad-card" id="admForm"><div class="ad-ct">Создать аккаунт</div>
+  <label>Имя<input id="aFirst" value="${esc(F.first||'')}" required></label><label>Фамилия<input id="aLast" value="${esc(F.last||'')}" required></label><label>Пароль<input id="aPass" type="text" minlength="4" required value="${esc(F.pass||'')}"></label>
+  <label>Роль<select id="aRole"><option value="teacher" ${F.role!=='admin'?'selected':''}>Учитель</option><option value="admin" ${F.role==='admin'?'selected':''}>Администратор</option></select></label><div class="ad-err">${esc(F.err||'')}</div><button class="ad-btn pri" type="button" data-a="adm-create">Создать</button></form>
+  <div class="ad-card span2"><div class="ad-ct">Все аккаунты (${(AD.accs||[]).length})</div><ol class="ad-tl">${(AD.accs||[]).map((a,i)=>`<li><b class="${a.role==='admin'?'m1':''}">${a.role==='admin'?'A':i+1}</b><span>${esc(a.first+' '+a.last)}<small>${a.role==='admin'?'Администратор':'Учитель'}${a.created?' · с '+new Date(a.created).toLocaleDateString('ru-RU'):''}</small></span></li>`).join('')}</ol></div></section>`}
+document.addEventListener('change',e=>{const k=e.target&&e.target.dataset&&e.target.dataset.a2;if(k){AD.f[k]=e.target.value;render()}});
+A['adm-reload']=()=>admLoad();A['adm-freset']=()=>{AD.f={grade:'',subject:''};render()};
+A['adm-cls']=d=>{AD.cls=d.k;window.scrollTo(0,0);render()};A['adm-back']=()=>{AD.cls=null;render()};
+A['adm-create']=async()=>{const first=$('#aFirst').value.trim(),last=$('#aLast').value.trim(),pass=$('#aPass').value,role=$('#aRole').value;AD.form={first,last,pass,role,err:''};
+  if(first.length<2||last.length<2){AD.form.err='Введите имя и фамилию';return render()}if(pass.length<4){AD.form.err='Пароль — не меньше 4 символов';return render()}
+  const id='u'+(await sha(normName(first+' '+last))).slice(0,20);try{if(await getAcc(id)){AD.form.err='Такой аккаунт уже есть';return render()}const salt=uid()+uid();await setAcc(id,{first,last,salt,hash:await sha(salt+pass),role,created:Date.now(),by:me.tid});
+  AD.form={};toast((role==='admin'?'Администратор':'Учитель')+' создан: '+first+' '+last);admLoad()}catch(e){AD.form.err='Не удалось сохранить на сервере';render()}};
+
+/* ---------- собственный сервер (Supabase): работает у любого человека без аккаунта Claude ---------- */
+const SB_CFG={url:'https://qhxiuvmekzqghdizfkna.supabase.co',key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFoeGl1dm1la3pxZ2hkaXpma25hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxOTA5NTEsImV4cCI6MjExMDc2Njk1MX0.AWZpSF1G4qTFpsti0yHMUz8b1ERqE62MDjlihgdOHRE'}; // ← сюда Project URL и anon public key
+let SBC=null;
+function sbAdapter(){const c=SBC,parent=p=>p.split('/').slice(0,-1).join('/'),last=p=>p.split('/').pop();
+  const docRef=path=>({get:async()=>{const {data,error}=await c.from('kl_docs').select('data').eq('path',path).maybeSingle();if(error)throw error;return{exists:!!data,id:last(path),data:()=>data?data.data:undefined}},
+    set:async o=>{const {error}=await c.from('kl_docs').upsert({path,col:parent(path),data:o,updated_at:new Date().toISOString()});if(error)throw error},
+    delete:async()=>{const {error}=await c.from('kl_docs').delete().eq('path',path);if(error)throw error},
+    onSnapshot:(cb,err)=>{let alive=true;const pull=()=>docRef(path).get().then(s=>alive&&cb(s)).catch(e=>err&&err(e));pull();
+      const ch=c.channel('d:'+path+':'+uid()).on('postgres_changes',{event:'*',schema:'public',table:'kl_docs',filter:'path=eq.'+path},pull).subscribe();return()=>{alive=false;c.removeChannel(ch)}}});
+  const colRef=(col,flt)=>({doc:id=>docRef(col+'/'+id),where:(f,op,v)=>colRef(col,x=>x&&x[f]===v),
+    get:async()=>{const {data,error}=await c.from('kl_docs').select('path,data').eq('col',col);if(error)throw error;const docs=(data||[]).filter(r=>!flt||flt(r.data)).map(r=>({id:last(r.path),exists:true,data:()=>r.data}));return{docs,metadata:{fromCache:false}}},
+    onSnapshot:(cb,err)=>{let alive=true,t=null;const pull=()=>colRef(col,flt).get().then(s=>alive&&cb(s)).catch(e=>err&&err(e));pull();
+      const ch=c.channel('c:'+col+':'+uid()).on('postgres_changes',{event:'*',schema:'public',table:'kl_docs',filter:'col=eq.'+col},()=>{clearTimeout(t);t=setTimeout(pull,150)}).subscribe();return()=>{alive=false;c.removeChannel(ch)}}});
+  return{collection:c2=>colRef(c2),doc:p=>docRef(p)}}
+function sbRoom(){return{join:async name=>{const ch=SBC.channel('room:'+name,{config:{presence:{key:uid()}}});let mine={},peersCb=null,ok=false;
+  const emit=()=>{if(!peersCb)return;const st=ch.presenceState();peersCb({peers:Object.values(st).map(a=>({presence:a[a.length-1]}))})};
+  ch.on('presence',{event:'sync'},emit);await new Promise((res,rej)=>{ch.subscribe(s=>{if(s==='SUBSCRIBED'){ok=true;res()}else if(s==='CHANNEL_ERROR'||s==='TIMED_OUT'){if(!ok)rej(new Error(s))}})});
+  return{presence:async o=>{mine={...mine,...o};await ch.track(mine)},onPeers:(cb,err)=>{peersCb=cb;emit()},leave:async()=>{await ch.untrack();SBC.removeChannel(ch)}}}}}
+async function sbInit(){if(!SB_CFG.url||!SB_CFG.key)return false;try{if(!window.supabase){await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
+  SBC=window.supabase.createClient(SB_CFG.url,SB_CFG.key,{auth:{persistSession:false}});db=sbAdapter();room=sbRoom();user=null;sample=null;isTeacher=true;return true}catch(e){return false}}
+
+/* ---------- boot ---------- */
+let UNSUB=[];
+function loadData(){UNSUB.forEach(f=>{try{f()}catch(e){}});UNSUB=[];COLS.forEach(c=>S[c]=[]);ready=false;stale=false;
+  if(!db){const d=ls('kl-data-'+me.tid);if(d)COLS.forEach(c=>S[c]=d[c]||[]);ready=true;migrate();const sv=ls('kl-run-'+me.tid);if(sv&&sv.kind==='solo'&&sv.runId)Q=sv;return Promise.resolve()}
+  return new Promise(res=>{let got=new Set(),fresh=new Set();const timer=setTimeout(()=>{if(!ready){ready=true;stale=true;render();res()}},10000);
+  COLS.forEach(c=>{const q=c==='sessions'?db.collection('sessions').where('owner','==',me.tid):db.collection(cp(c));UNSUB.push(q.onSnapshot(snap=>{S[c]=snap.docs.map(d=>({id:d.id,...d.data()}));got.add(c);if(!snap.metadata.fromCache){stale=false;fresh.add(c);if(fresh.size===COLS.length)migrate()}if(got.size===COLS.length){clearTimeout(timer);const first=!ready;ready=true;if(first){const sv=ls('kl-run-'+me.tid);if(sv&&sv.kind==='solo'&&sv.runId)Q=sv;render();res()}else softRender()}},e=>{got.add(c);if(e&&e.code==='revoked')stale=true;if(got.size===COLS.length&&!ready){clearTimeout(timer);ready=true;render();res()}}))})})}
+A['lg-mode']=()=>{LG.mode=LG.mode==='in'?'up':'in';LG.err='';LG.first=$('#lgFirst').value;LG.last=$('#lgLast').value;render()};
+A['lg-out']=()=>confirmBox('Выйти из кабинета? Ваши данные останутся на сервере.',()=>{AD.st='idle';AD.cls=null;UNSUB.forEach(f=>{try{f()}catch(e){}});UNSUB=[];me=null;ls('kl-me',null);COLS.forEach(c=>S[c]=[]);Q=null;R=null;location.hash='';render()},'Выйти');
+async function boot(){const SBOK=await sbInit();if(!SBOK){for(let i=0;i<15&&!(window.claude&&window.claude.use);i++)await new Promise(r=>setTimeout(r,100));
+  if(window.claude&&window.claude.use){const u=n=>window.claude.use(n).catch(()=>null);[db,user,room,sample]=await Promise.all(['db','user','room','sample'].map(u))}
+  if(db&&user){try{isTeacher=!!(await user.canEdit())}catch(e){isTeacher=false}}}
+  loadCurr();
+  if(db&&!isTeacher){ready=true;try{const sv=JSON.parse(sessionStorage.getItem('kl-j'));if(sv&&sv.code){J={st:'joined',...sv};await jConnect()}}catch(e){}}
+  else if(me&&me.role==='admin'){ready=true}else if(me)await loadData();else ready=true;
+  render()}
+new MutationObserver(()=>{document.querySelectorAll('[data-qr]:not([data-done])').forEach(el=>{el.dataset.done=1;try{new QRCode(el,{text:el.dataset.qr,width:230,height:230,colorDark:'#0F1531',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M})}catch(e){el.textContent='QR-код не загрузился — используйте код ниже'}})}).observe(document.getElementById('app'),{childList:true,subtree:true});
+boot();
 </script>
 </body>
 </html>
