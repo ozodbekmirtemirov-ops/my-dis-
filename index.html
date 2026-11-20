@@ -860,7 +860,7 @@ function sbAdapter(){const c=SBC,parent=p=>p.split('/').slice(0,-1).join('/'),la
     onSnapshot:(cb,err)=>{let alive=true,t=null;const pull=()=>colRef(col,flt).get().then(s=>alive&&cb(s)).catch(e=>err&&err(e));pull();
       const ch=c.channel('c:'+col+':'+uid()).on('postgres_changes',{event:'*',schema:'public',table:'kl_docs',filter:'col=eq.'+col},()=>{clearTimeout(t);t=setTimeout(pull,150)}).subscribe();return()=>{alive=false;c.removeChannel(ch)}}});
   return{collection:c2=>colRef(c2),doc:p=>docRef(p)}}
-function sbRoom(){return{join:async name=>{const ch=SBC.channel('room:'+name,{config:{presence:{key:uid()}}});let mine={},peersCb=null,ok=false;
+function sbRoom(){return{join:async name=>{const ch=SBC.channel('room:'+name,{config:{presence:{key:uid(),enabled:true}}});let mine={},peersCb=null,ok=false;
   const emit=()=>{if(!peersCb)return;const st=ch.presenceState();peersCb({peers:Object.values(st).map(a=>({presence:a[a.length-1]}))})};
   ch.on('presence',{event:'sync'},emit);await new Promise((res,rej)=>{ch.subscribe(s=>{if(s==='SUBSCRIBED'){ok=true;res()}else if(s==='CHANNEL_ERROR'||s==='TIMED_OUT'){if(!ok)rej(new Error(s))}})});
   return{presence:async o=>{mine={...mine,...o};await ch.track(mine)},onPeers:(cb,err)=>{peersCb=cb;emit()},leave:async()=>{await ch.untrack();SBC.removeChannel(ch)}}}}}
