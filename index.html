@@ -960,7 +960,7 @@ function sbRoom(){return{join:async name=>{let mine={},peersCb=null,ch=null,trac
   let err;for(let k=0;k<4;k++){try{await open();err=null;break}catch(e){err=e;await new Promise(r=>setTimeout(r,600))}}if(err)throw err;
   return{presence:async o=>{mine={...mine,...o};tracked=true;for(let k=0;k<3;k++){try{const r=await ch.track(mine);if(r==='ok')return;}catch(e){}await new Promise(r=>setTimeout(r,500))}},onPeers:(cb,err)=>{peersCb=cb;emit()},leave:async()=>{try{await ch.untrack()}catch(e){}SBC.removeChannel(ch)}}}}}
 async function sbInit(){if(!SB_CFG.url||!SB_CFG.key)return false;try{if(!window.supabase){await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
-  SBC=window.supabase.createClient(SB_CFG.url,SB_CFG.key,{auth:{persistSession:false}});db=sbAdapter();room=sbRoom();user=null;sample=null;isTeacher=true;return true}catch(e){return false}}
+  SBC=window.supabase.createClient(SB_CFG.url,SB_CFG.key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false,storageKey:'kl-'+uid(),lock:async(n,t,fn)=>await fn()},realtime:{params:{eventsPerSecond:20}}});db=sbAdapter();room=sbRoom();user=null;sample=null;isTeacher=true;return true}catch(e){return false}}
 
 /* ---------- boot ---------- */
 let UNSUB=[];
