@@ -929,8 +929,15 @@ function admTeachersView(){const runs=admFacts();return `<div class="ad-hd"><h1>
 function admAccView(){const F=AD.form;return `<div class="ad-hd"><h1>Аккаунты</h1></div><section class="ad-grid"><form class="ad-card" id="admForm"><div class="ad-ct">Создать аккаунт</div>
   <label>Имя<input id="aFirst" value="${esc(F.first||'')}" required></label><label>Фамилия<input id="aLast" value="${esc(F.last||'')}" required></label><label>Пароль<input id="aPass" type="text" minlength="4" required value="${esc(F.pass||'')}"></label>
   <label>Роль<select id="aRole"><option value="teacher" ${F.role!=='admin'?'selected':''}>Учитель</option><option value="admin" ${F.role==='admin'?'selected':''}>Администратор</option></select></label><div class="ad-err">${esc(F.err||'')}</div><button class="ad-btn pri" type="button" data-a="adm-create">Создать</button></form>
+  <form class="ad-card" id="admPw"><div class="ad-ct">Сменить пароль</div>
+  <label>Чей пароль<select id="pwWho"><option value="${me.tid}">Мой (${esc(me.first+' '+me.last)})</option>${(AD.accs||[]).filter(a=>a.id!==me.tid).map(a=>`<option value="${a.id}">${esc(a.first+' '+a.last)} — ${a.role==='admin'?'админ':'учитель'}</option>`).join('')}</select></label>
+  <label>Новый пароль<input id="pwNew" type="text" minlength="4"></label><label>Повторите<input id="pwNew2" type="text" minlength="4"></label><div class="ad-err">${esc(AD.pwErr||'')}</div><button class="ad-btn pri" type="button" data-a="adm-pw">Сохранить пароль</button></form>
   <div class="ad-card span2"><div class="ad-ct">Все аккаунты (${(AD.accs||[]).length})</div><ol class="ad-tl">${(AD.accs||[]).map((a,i)=>`<li><b class="${a.role==='admin'?'m1':''}">${a.role==='admin'?'A':i+1}</b><span>${esc(a.first+' '+a.last)}<small>${a.role==='admin'?'Администратор':'Учитель'}${a.created?' · с '+new Date(a.created).toLocaleDateString('ru-RU'):''}</small></span></li>`).join('')}</ol></div></section>`}
 document.addEventListener('change',e=>{const k=e.target&&e.target.dataset&&e.target.dataset.a2;if(k){AD.f[k]=e.target.value;render()}});
+A['adm-pw']=async()=>{const id=$('#pwWho').value,p1=$('#pwNew').value,p2=$('#pwNew2').value;AD.pwErr='';
+  if(p1.length<6){AD.pwErr='Пароль — не меньше 6 символов';return render()}if(p1!==p2){AD.pwErr='Пароли не совпадают';return render()}
+  try{const acc=await getAcc(id);if(!acc){AD.pwErr='Аккаунт не найден';return render()}const salt=uid()+uid();const {id:_x,...rest}=acc;await setAcc(id,{...rest,salt,hash:await sha(salt+p1),pwChanged:Date.now()});
+    toast('Пароль изменён: '+acc.first+' '+acc.last);admLoad()}catch(e){AD.pwErr='Не удалось сохранить на сервере';render()}};
 A['adm-reload']=()=>admLoad();A['adm-freset']=()=>{AD.f={grade:'',subject:''};render()};
 A['adm-cls']=d=>{AD.cls=d.k;window.scrollTo(0,0);render()};A['adm-back']=()=>{AD.cls=null;render()};
 A['adm-create']=async()=>{const first=$('#aFirst').value.trim(),last=$('#aLast').value.trim(),pass=$('#aPass').value,role=$('#aRole').value;AD.form={first,last,pass,role,err:''};
